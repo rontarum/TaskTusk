@@ -33,12 +33,14 @@ export const BackgroundGradientAnimation = ({
     interactive?: boolean;
     containerClassName?: string;
 }) => {
+    const containerRef = useRef<HTMLDivElement>(null);
     const interactiveRef = useRef<HTMLDivElement>(null);
 
-    const [curX, setCurX] = useState(0);
-    const [curY, setCurY] = useState(0);
-    const [tgX, setTgX] = useState(0);
-    const [tgY, setTgY] = useState(0);
+    const curX = useRef(0);
+    const curY = useRef(0);
+    const tgX = useRef(0);
+    const tgY = useRef(0);
+
     useEffect(() => {
         document.body.style.setProperty(
             "--gradient-background-start",
@@ -70,25 +72,36 @@ export const BackgroundGradientAnimation = ({
     ]);
 
     useEffect(() => {
+        let animationFrameId: number;
+
         function move() {
             if (!interactiveRef.current) {
                 return;
             }
-            setCurX(curX + (tgX - curX) / 20);
-            setCurY(curY + (tgY - curY) / 20);
+            curX.current = curX.current + (tgX.current - curX.current) / 20;
+            curY.current = curY.current + (tgY.current - curY.current) / 20;
+
             interactiveRef.current.style.transform = `translate(${Math.round(
-                curX
-            )}px, ${Math.round(curY)}px)`;
+                curX.current
+            )}px, ${Math.round(curY.current)}px)`;
+
+            animationFrameId = requestAnimationFrame(move);
         }
 
-        move();
-    }, [tgX, tgY, curX, curY]);
+        if (interactive) {
+            animationFrameId = requestAnimationFrame(move);
+        }
+
+        return () => {
+            cancelAnimationFrame(animationFrameId);
+        };
+    }, [interactive]);
 
     const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
-        if (interactiveRef.current) {
-            const rect = interactiveRef.current.getBoundingClientRect();
-            setTgX(event.clientX - rect.left);
-            setTgY(event.clientY - rect.top);
+        if (containerRef.current) {
+            const rect = containerRef.current.getBoundingClientRect();
+            tgX.current = event.clientX - rect.left;
+            tgY.current = event.clientY - rect.top;
         }
     };
 
@@ -99,6 +112,7 @@ export const BackgroundGradientAnimation = ({
 
     return (
         <div
+            ref={containerRef}
             className={cn(
                 "h-screen w-screen relative overflow-hidden top-0 left-0 bg-[linear-gradient(40deg,var(--gradient-background-start),var(--gradient-background-end))]",
                 containerClassName
@@ -180,12 +194,12 @@ export const BackgroundGradientAnimation = ({
                     <div
                         ref={interactiveRef}
                         className={cn(
-                            `absolute z-50`, // Ensure z-index
-                            `[mix-blend-mode:normal] w-full h-full -top-1/2 -left-1/2`,
+                            `absolute z-50`,
+                            `[mix-blend-mode:normal] w-[calc(var(--size)*1.5)] h-[calc(var(--size)*1.5)] -top-[calc(var(--size)*0.75)] -left-[calc(var(--size)*0.75)]`,
                             `opacity-100`
                         )}
                         style={{
-                            background: `radial-gradient(circle at center, rgba(${pointerColor}, 1) 0, rgba(${pointerColor}, 0) 50%) no-repeat`
+                            background: `radial-gradient(circle at center, rgba(${pointerColor}, 0.8) 0, rgba(${pointerColor}, 0) 50%) no-repeat`
                         }}
                     ></div>
                 )}
@@ -193,3 +207,4 @@ export const BackgroundGradientAnimation = ({
         </div>
     );
 };
+
