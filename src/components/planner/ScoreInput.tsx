@@ -50,25 +50,38 @@ export function ScoreInput({ value, id, field, min, max, step, ariaLabel, onUpda
     }
   );
 
-  function wheelNumberAdjust(e: React.WheelEvent<HTMLInputElement>) {
-    e.preventDefault();
-    e.stopPropagation();
+  const inputRef = React.useRef<HTMLInputElement>(null);
 
-    const direction = e.deltaY > 0 ? -1 : 1;
-    const current = Number((e.currentTarget as HTMLInputElement).value);
-    const next = clampNumber((Number.isFinite(current) ? current : min) + direction * step, min, max);
-    onUpdate(id, { [field]: next } as Partial<PlannerItem>);
+  React.useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
 
-    // Trigger local squash
-    localWheelValue.set(1);
-    setTimeout(() => localWheelValue.set(0), 40);
-  }
+    function handleWheelNative(e: WheelEvent) {
+      // Prevent the page from scrolling
+      e.preventDefault();
+      e.stopPropagation();
+
+      const direction = e.deltaY > 0 ? -1 : 1;
+      // Use the current value from the prop to calculate the next
+      const next = clampNumber(value + direction * step, min, max);
+      onUpdate(id, { [field]: next } as Partial<PlannerItem>);
+
+      // Trigger local squash
+      localWheelValue.set(1);
+      setTimeout(() => localWheelValue.set(0), 40);
+    }
+
+    el.addEventListener("wheel", handleWheelNative, { passive: false });
+    return () => el.removeEventListener("wheel", handleWheelNative);
+  }, [id, field, value, min, max, step, onUpdate, localWheelValue]);
 
   return (
     <motion.div
       style={{
         scaleX: combinedScaleX,
         scaleY: combinedScaleY,
+        z: 0,
+        transformStyle: "preserve-3d"
       }}
       className={cn(
         "group relative rounded-2xl border border-border/30 bg-background/35 transition-colors origin-center",
@@ -79,26 +92,27 @@ export function ScoreInput({ value, id, field, min, max, step, ariaLabel, onUpda
         className,
       )}
     >
-      <input
-        aria-label={ariaLabel}
-        inputMode="numeric"
-        type="number"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onChange={(e) =>
-          onUpdate(id, {
-            [field]: clampNumber(numberFromInput(e.target.value), min, max),
-          } as Partial<PlannerItem>)
-        }
-        onWheel={wheelNumberAdjust}
-        className={cn(
-          "h-10 w-full bg-transparent px-3 text-center text-xs font-medium font-numbers tabular-nums",
-          "outline-none placeholder:text-muted-foreground",
-          "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
-        )}
-      />
+      <div style={{ transform: "translateZ(40px)", transformStyle: "preserve-3d" }} className="h-full w-full">
+        <input
+          ref={inputRef}
+          aria-label={ariaLabel}
+          inputMode="numeric"
+          min={min}
+          max={max}
+          step={step}
+          value={value}
+          onChange={(e) =>
+            onUpdate(id, {
+              [field]: clampNumber(numberFromInput(e.target.value), min, max),
+            } as Partial<PlannerItem>)
+          }
+          className={cn(
+            "h-10 w-full bg-transparent px-3 text-center text-xs font-medium font-numbers tabular-nums",
+            "outline-none placeholder:text-muted-foreground",
+            "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
+          )}
+        />
+      </div>
     </motion.div>
   );
 }

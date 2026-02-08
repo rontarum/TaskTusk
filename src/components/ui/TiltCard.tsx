@@ -1,0 +1,56 @@
+import * as React from "react";
+import VanillaTilt, { TiltOptions } from "vanilla-tilt";
+import { cn } from "@/lib/utils";
+
+interface TiltCardProps extends React.HTMLAttributes<HTMLDivElement> {
+    options?: TiltOptions;
+    children: React.ReactNode;
+}
+
+export const TiltCard = React.forwardRef<HTMLDivElement, TiltCardProps>(
+    ({ options, children, className, ...props }, ref) => {
+        const localRef = React.useRef<HTMLDivElement>(null);
+
+        // Merge ref
+        React.useImperativeHandle(ref, () => localRef.current!);
+
+        React.useEffect(() => {
+            if (localRef.current) {
+                VanillaTilt.init(localRef.current, {
+                    reverse: true, // Reversed tilt direction
+                    max: 10, // Increased tilt angle for more movement
+                    speed: 600, // Slower transition for "antimagnetic" smoothness
+                    glare: true,
+                    "max-glare": 0.12,
+                    perspective: 10000, // High perspective eliminates idle shifts
+                    scale: 1.00,
+                    easing: "cubic-bezier(.06,.96,.63, 0.96)", // Elastic but smooth easing
+                    ...options,
+                });
+            }
+
+            return () => {
+                if (localRef.current && (localRef.current as any).vanillaTilt) {
+                    (localRef.current as any).vanillaTilt.destroy();
+                }
+            };
+        }, [options]);
+
+        return (
+            <div
+                ref={localRef}
+                className={cn("tilt-card", className)}
+                {...props}
+                style={{
+                    transformStyle: "preserve-3d",
+                    willChange: "transform",
+                    ...props.style
+                }}
+            >
+                {children}
+            </div>
+        );
+    }
+);
+
+TiltCard.displayName = "TiltCard";

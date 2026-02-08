@@ -292,9 +292,13 @@ All colors MUST be HSL.
       linear-gradient(180deg, hsl(var(--card) / 0.86), hsl(var(--card) / 0.96)),
       radial-gradient(700px 280px at 15% 10%, hsl(var(--primary) / 0.08), transparent 55%),
       radial-gradient(800px 320px at 85% 0%, hsl(var(--accent) / 0.08), transparent 55%);
-    @apply relative overflow-hidden rounded-[28px] border border-border/60 shadow-elev backdrop-blur;
+    @apply relative rounded-[28px] border border-border/60 shadow-elev;
   }
 
+
+  .tilt-card {
+    transform-style: preserve-3d;
+  }
 
   .custom-scrollbar {
     scrollbar-width: thin;

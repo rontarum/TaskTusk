@@ -14,6 +14,7 @@ import { BackgroundGradientAnimation } from "@/components/ui/background-gradient
 import { ParallaxLogo } from "@/components/ParallaxLogo";
 import { ParallaxFlower } from "@/components/ParallaxFlower";
 import { DonateButton } from "@/components/DonateButton";
+import { TiltCard } from "@/components/ui/TiltCard";
 
 function uid() {
   return crypto?.randomUUID?.() ?? Math.random().toString(16).slice(2);
@@ -224,9 +225,8 @@ const Index = () => {
           </div>
 
           <div className="grid items-stretch gap-8 lg:grid-cols-[400px_1fr]">
-            {/* Left */}
             <section className="flex flex-col">
-              <div className="paper h-full p-6">
+              <TiltCard className="paper h-full p-6">
                 <div className="mb-4 flex items-center justify-between">
                   <div className="text-lg font-semibold font-heading">Таски</div>
                   <div className="text-xs text-muted-foreground">{items.length} шт.</div>
@@ -234,7 +234,7 @@ const Index = () => {
 
                 <PlannerItemForm onAdd={addItem} />
 
-                <div className="mt-5">
+                <div className="mt-5" style={{ transformStyle: "preserve-3d" }}>
                   <PlannerItemList
                     variant="embedded"
                     items={items}
@@ -244,7 +244,7 @@ const Index = () => {
                     onUpdate={updateItem}
                   />
                 </div>
-              </div>
+              </TiltCard>
             </section>
 
             {/* Right */}
