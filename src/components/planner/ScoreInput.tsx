@@ -80,6 +80,8 @@ export function ScoreInput({ value, id, field, min, max, step, ariaLabel, onUpda
       style={{
         scaleX: combinedScaleX,
         scaleY: combinedScaleY,
+        z: 0,
+        transformStyle: "preserve-3d"
       }}
       className={cn(
         "group relative rounded-2xl border border-border/30 bg-background/35 transition-colors origin-center",
@@ -90,25 +92,27 @@ export function ScoreInput({ value, id, field, min, max, step, ariaLabel, onUpda
         className,
       )}
     >
-      <input
-        ref={inputRef}
-        aria-label={ariaLabel}
-        inputMode="numeric"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onChange={(e) =>
-          onUpdate(id, {
-            [field]: clampNumber(numberFromInput(e.target.value), min, max),
-          } as Partial<PlannerItem>)
-        }
-        className={cn(
-          "h-10 w-full bg-transparent px-3 text-center text-xs font-medium font-numbers tabular-nums",
-          "outline-none placeholder:text-muted-foreground",
-          "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
-        )}
-      />
+      <div style={{ transform: "translateZ(40px)", transformStyle: "preserve-3d" }} className="h-full w-full">
+        <input
+          ref={inputRef}
+          aria-label={ariaLabel}
+          inputMode="numeric"
+          min={min}
+          max={max}
+          step={step}
+          value={value}
+          onChange={(e) =>
+            onUpdate(id, {
+              [field]: clampNumber(numberFromInput(e.target.value), min, max),
+            } as Partial<PlannerItem>)
+          }
+          className={cn(
+            "h-10 w-full bg-transparent px-3 text-center text-xs font-medium font-numbers tabular-nums",
+            "outline-none placeholder:text-muted-foreground",
+            "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
+          )}
+        />
+      </div>
     </motion.div>
   );
 }

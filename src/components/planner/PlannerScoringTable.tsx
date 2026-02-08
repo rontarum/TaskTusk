@@ -81,24 +81,36 @@ export function PlannerScoringTable({ items, order, onUpdate, compact, onEditing
       </div>
 
       {/* Inner table surface (subtle tint + white dividers like in reference) */}
-      <div className="mx-6 mb-6 flex-1 overflow-hidden rounded-2xl bg-background/25">
-        <div className="relative h-full w-full">
+      <div className="mx-6 mb-6 flex-1 rounded-2xl bg-background/25" style={{ transformStyle: "preserve-3d" }}>
+        <div className="relative h-full w-full" style={{ transformStyle: "preserve-3d" }}>
           {/* Decorative outer borders shortened by 1.6x, centered with gradient fade */}
           <div
-            className="absolute top-0 left-1/2 -translate-x-1/2 h-px w-[90.0%] pointer-events-none z-10"
-            style={{ background: 'linear-gradient(to right, transparent, hsl(var(--button-outline) / 0.6), transparent)' }}
+            className="absolute top-0 left-1/2 h-px w-[90.0%] pointer-events-none z-10"
+            style={{
+              background: 'linear-gradient(to right, transparent, hsl(var(--button-outline) / 0.6), transparent)',
+              transform: "translateX(-50%) translateZ(40px)"
+            }}
           />
           <div
-            className="absolute bottom-0 left-1/2 -translate-x-1/2 h-px w-[90.0%] pointer-events-none z-10"
-            style={{ background: 'linear-gradient(to right, transparent, hsl(var(--button-outline) / 0.6), transparent)' }}
+            className="absolute bottom-0 left-1/2 h-px w-[90.0%] pointer-events-none z-10"
+            style={{
+              background: 'linear-gradient(to right, transparent, hsl(var(--button-outline) / 0.6), transparent)',
+              transform: "translateX(-50%) translateZ(40px)"
+            }}
           />
           <div
-            className="absolute left-0 top-1/2 -translate-y-1/2 w-px h-[90.0%] pointer-events-none z-10"
-            style={{ background: 'linear-gradient(to bottom, transparent, hsl(var(--button-outline) / 0.6), transparent)' }}
+            className="absolute left-0 top-1/2 w-px h-[90.0%] pointer-events-none z-10"
+            style={{
+              background: 'linear-gradient(to bottom, transparent, hsl(var(--button-outline) / 0.6), transparent)',
+              transform: "translateY(-50%) translateZ(40px)"
+            }}
           />
           <div
-            className="absolute right-0 top-1/2 -translate-y-1/2 w-px h-[90.0%] pointer-events-none z-10"
-            style={{ background: 'linear-gradient(to bottom, transparent, hsl(var(--button-outline) / 0.6), transparent)' }}
+            className="absolute right-0 top-1/2 w-px h-[90.0%] pointer-events-none z-10"
+            style={{
+              background: 'linear-gradient(to bottom, transparent, hsl(var(--button-outline) / 0.6), transparent)',
+              transform: "translateY(-50%) translateZ(40px)"
+            }}
           />
 
           <div className="px-5 pb-2 pt-4">
@@ -112,7 +124,7 @@ export function PlannerScoringTable({ items, order, onUpdate, compact, onEditing
             </div>
           </div>
 
-          <div className="border-t border-buttonOutline/60" />
+          <div className="border-t border-buttonOutline/60" style={{ transform: "translateZ(40px)" }} />
 
           <AnimatePresence initial={false}>
             {ordered.map((it) => {
@@ -129,14 +141,16 @@ export function PlannerScoringTable({ items, order, onUpdate, compact, onEditing
                   exit="exit"
                   transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
                   className="px-5 py-4 border-b border-buttonOutline/50 last:border-b-0"
+                  style={{ transformStyle: "preserve-3d", z: 40 }}
                 >
                   <div
                     className={cn(
                       "grid items-center gap-4",
                       "grid-cols-[1fr_72px_72px_72px_84px_96px]",
                     )}
+                    style={{ transformStyle: "preserve-3d" }}
                   >
-                    <div className="flex min-w-0 items-center gap-3">
+                    <div className="flex min-w-0 items-center gap-3" style={{ transform: "translateZ(40px)" }}>
                       <span aria-hidden className="w-7 text-lg">
                         {it.emoji}
                       </span>
