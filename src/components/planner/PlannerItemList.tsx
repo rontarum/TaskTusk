@@ -73,6 +73,7 @@ export function PlannerItemList({
       className={cn(
         isEmbedded ? "mt-1 space-y-2" : "p-2",
       )}
+      style={{ transformStyle: "preserve-3d" }}
     >
       <AnimatePresence initial={false}>
         {items.map((it) => {
@@ -88,6 +89,7 @@ export function PlannerItemList({
               animate="animate"
               exit="exit"
               transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+              style={{ transformStyle: "preserve-3d" }}
             >
               <div
                 role="button"
@@ -102,20 +104,23 @@ export function PlannerItemList({
                   "transition-colors hover:bg-background/55",
                   isActive && "bg-background/70 shadow-xs",
                 )}
+                style={{ transform: "translateZ(40px)", transformStyle: "preserve-3d" }}
               >
                 {/* emoji: click to change */}
                 <div
                   className="shrink-0"
                   onClick={(e) => e.stopPropagation()}
                   onKeyDown={(e) => e.stopPropagation()}
+                  style={{ transformStyle: "preserve-3d" }}
                 >
                   <EmojiPicker
                     value={it.emoji}
                     onChange={(emoji) => onUpdate(it.id, { emoji })}
                     ariaLabel={`Emoji for ${it.text}`}
+                    style={{ transform: "translateZ(0px)" }}
                     buttonVariant="ghost"
                     buttonClassName={cn(
-                      "h-9 w-9 rounded-xl text-base",
+                      "h-9 w-9 rounded-xl text-base relative overflow-visible",
                       // remove the white outline in light mode; keep it feeling like an embedded control
                       "border-0 bg-transparent shadow-none",
                       "hover:bg-background/35",
@@ -124,7 +129,7 @@ export function PlannerItemList({
                 </div>
 
                 {/* text: click to edit */}
-                <div className="min-w-0 flex-1">
+                <div className="min-w-0 flex-1" style={{ transformStyle: "preserve-3d" }}>
                   {isEditing ? (
                     <Input
                       autoFocus
@@ -149,8 +154,14 @@ export function PlannerItemList({
                         startEditText(it.id, it.text);
                       }}
                       title="Нажми, чтобы изменить"
+                      style={{
+                        transform: "translateZ(0px)",
+                        transformStyle: "preserve-3d"
+                      }}
                     >
-                      {it.text}
+                      <span className="block" style={{ transform: "translateZ(40px)" }}>
+                        {it.text}
+                      </span>
                     </button>
                   )}
                 </div>
@@ -172,10 +183,13 @@ export function PlannerItemList({
                     // default: same as main text; hover: red
                     "text-foreground/80 hover:bg-destructive/15 hover:text-destructive",
                     // opt out of global button lift/shadow + rubber press
-                    "no-elevate",
+                    "no-elevate relative overflow-visible",
                   )}
+                  style={{ transform: "translateZ(0px)", transformStyle: "preserve-3d" }}
                 >
-                  <Trash2 />
+                  <div className="flex h-full w-full items-center justify-center" style={{ transform: "translateZ(40px)" }}>
+                    <Trash2 />
+                  </div>
                 </Button>
               </div>
             </motion.li>

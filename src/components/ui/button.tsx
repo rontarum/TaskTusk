@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
   // IMPORTANT: don't use tailwind `transition-*` or `shadow-*` here, they override our hover-elevate motion system.
-  "[--elev-shadow:hsl(var(--foreground))] rubber-press inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover-elevate active-elevate-2 [transform:translateZ(0)] [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "[--elev-shadow:hsl(var(--foreground))] rubber-press inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover-elevate active-elevate-2 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {

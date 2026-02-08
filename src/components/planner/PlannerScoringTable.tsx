@@ -4,6 +4,7 @@ import type { PlannerItem } from "./types";
 import { scoreColor, scoreOf } from "./scoring";
 import { ScoreInput } from "./ScoreInput";
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { TiltCard } from "../ui/TiltCard";
 
 const rowVariants = {
   initial: { opacity: 0, scale: 0.95 },
@@ -57,10 +58,10 @@ export function PlannerScoringTable({ items, order, onUpdate, compact, onEditing
 
   if (ordered.length === 0) {
     return (
-      <div className="paper p-6">
+      <TiltCard className="paper p-6">
         <div className="text-sm font-medium font-heading">Оценка</div>
         <p className="mt-1 text-sm text-muted-foreground">Создай несколько задач для оценки и сравнения.</p>
-      </div>
+      </TiltCard>
     );
   }
 
@@ -68,7 +69,7 @@ export function PlannerScoringTable({ items, order, onUpdate, compact, onEditing
   const headerText = "text-[12px] font-semibold tracking-wider text-muted-foreground font-heading";
 
   return (
-    <section
+    <TiltCard
       ref={rootRef}
       className={cn("paper flex h-full flex-col", className)}
       onFocusCapture={handleFocusCapture}
@@ -213,6 +214,6 @@ export function PlannerScoringTable({ items, order, onUpdate, compact, onEditing
           </AnimatePresence>
         </div>
       </div>
-    </section>
+    </TiltCard>
   );
 }

@@ -21,13 +21,14 @@ export function PlannerItemForm({ onAdd }: Props) {
   }
 
   return (
-    <div>
-      <div className="flex items-center gap-3">
+    <div style={{ transformStyle: "preserve-3d" }}>
+      <div className="flex items-center gap-3" style={{ transformStyle: "preserve-3d" }}>
         <EmojiPicker
           value={emoji}
           onChange={setEmoji}
           ariaLabel="Emoji"
           buttonClassName="h-11 w-11 shrink-0 rounded-xl"
+          style={{ transform: "translateZ(60px)" }}
         />
 
         <Input
@@ -41,16 +42,24 @@ export function PlannerItemForm({ onAdd }: Props) {
           className="h-11 min-w-0 flex-1 rounded-xl px-4"
         />
 
-        <Button
-          variant="default"
-          size="icon"
-          onClick={submit}
-          aria-label="Add item"
-          title="Добавить"
-          className="h-11 w-11 shrink-0 rounded-xl"
-        >
-          <Plus />
-        </Button>
+        <div style={{ transform: "translateZ(60px)", transformStyle: "preserve-3d" }}>
+          <Button
+            variant="default"
+            size="icon"
+            onClick={submit}
+            aria-label="Add item"
+            title="Добавить"
+            className="relative h-11 w-11 shrink-0 overflow-visible rounded-xl p-0 no-elevate"
+            style={{ transform: "translateZ(0px)", transformStyle: "preserve-3d" }}
+          >
+            <div
+              className="flex h-full w-full items-center justify-center pointer-events-none"
+              style={{ transform: "translateZ(40px)" }}
+            >
+              <Plus className="size-5" />
+            </div>
+          </Button>
+        </div>
       </div>
     </div>
   );

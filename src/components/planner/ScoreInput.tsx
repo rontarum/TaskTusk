@@ -50,19 +50,30 @@ export function ScoreInput({ value, id, field, min, max, step, ariaLabel, onUpda
     }
   );
 
-  function wheelNumberAdjust(e: React.WheelEvent<HTMLInputElement>) {
-    e.preventDefault();
-    e.stopPropagation();
+  const inputRef = React.useRef<HTMLInputElement>(null);
 
-    const direction = e.deltaY > 0 ? -1 : 1;
-    const current = Number((e.currentTarget as HTMLInputElement).value);
-    const next = clampNumber((Number.isFinite(current) ? current : min) + direction * step, min, max);
-    onUpdate(id, { [field]: next } as Partial<PlannerItem>);
+  React.useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
 
-    // Trigger local squash
-    localWheelValue.set(1);
-    setTimeout(() => localWheelValue.set(0), 40);
-  }
+    function handleWheelNative(e: WheelEvent) {
+      // Prevent the page from scrolling
+      e.preventDefault();
+      e.stopPropagation();
+
+      const direction = e.deltaY > 0 ? -1 : 1;
+      // Use the current value from the prop to calculate the next
+      const next = clampNumber(value + direction * step, min, max);
+      onUpdate(id, { [field]: next } as Partial<PlannerItem>);
+
+      // Trigger local squash
+      localWheelValue.set(1);
+      setTimeout(() => localWheelValue.set(0), 40);
+    }
+
+    el.addEventListener("wheel", handleWheelNative, { passive: false });
+    return () => el.removeEventListener("wheel", handleWheelNative);
+  }, [id, field, value, min, max, step, onUpdate, localWheelValue]);
 
   return (
     <motion.div
@@ -80,9 +91,9 @@ export function ScoreInput({ value, id, field, min, max, step, ariaLabel, onUpda
       )}
     >
       <input
+        ref={inputRef}
         aria-label={ariaLabel}
         inputMode="numeric"
-        type="number"
         min={min}
         max={max}
         step={step}
@@ -92,7 +103,6 @@ export function ScoreInput({ value, id, field, min, max, step, ariaLabel, onUpda
             [field]: clampNumber(numberFromInput(e.target.value), min, max),
           } as Partial<PlannerItem>)
         }
-        onWheel={wheelNumberAdjust}
         className={cn(
           "h-10 w-full bg-transparent px-3 text-center text-xs font-medium font-numbers tabular-nums",
           "outline-none placeholder:text-muted-foreground",
