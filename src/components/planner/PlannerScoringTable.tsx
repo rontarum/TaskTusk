@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import type { PlannerItem } from "./types";
 import { scoreColor, scoreOf } from "./scoring";
 import { ScoreInput } from "./ScoreInput";
+import { ProgressBar } from "./ProgressBar";
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { TiltCard } from "../ui/TiltCard";
 
@@ -150,11 +151,20 @@ export function PlannerScoringTable({ items, order, onUpdate, compact, onEditing
                     )}
                     style={{ transformStyle: "preserve-3d" }}
                   >
-                    <div className="flex min-w-0 items-center gap-3" style={{ transform: "translateZ(40px)" }}>
-                      <span aria-hidden className="w-7 text-lg">
-                        {it.emoji}
-                      </span>
-                      <span className="truncate text-sm font-medium text-foreground">{it.text}</span>
+                    <div className="flex min-w-0 items-center gap-3" style={{ transformStyle: "preserve-3d" }}>
+                      <div style={{ transform: "translateZ(40px)" }}>
+                        <span aria-hidden className="w-7 text-lg">
+                          {it.emoji}
+                        </span>
+                      </div>
+                      <div style={{ transform: "translateZ(40px)" }}>
+                        <span className="truncate text-sm font-medium text-foreground">{it.text}</span>
+                      </div>
+                      <ProgressBar
+                        value={it.percent}
+                        squashX={squashX}
+                        squashY={squashY}
+                      />
                     </div>
 
                     <ScoreInput

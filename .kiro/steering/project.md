@@ -1,3 +1,7 @@
+---
+inclusion: always
+---
+
 # TaskTusk — Project Rules
 
 > **Выполняй задачи в верном порядке** — a task prioritization planner that scores items by importance, desire, difficulty, and completion percentage, then ranks them so the user tackles the right task first.

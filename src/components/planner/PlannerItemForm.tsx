@@ -42,14 +42,14 @@ export function PlannerItemForm({ onAdd }: Props) {
           className="h-11 min-w-0 flex-1 rounded-xl px-4"
         />
 
-        <div style={{ transform: "translateZ(60px)", transformStyle: "preserve-3d" }}>
+        <div className="no-elevate" style={{ transform: "translateZ(60px)", transformStyle: "preserve-3d" }}>
           <Button
             variant="default"
             size="icon"
             onClick={submit}
             aria-label="Add item"
             title="Добавить"
-            className="relative h-11 w-11 shrink-0 overflow-visible rounded-xl p-0 no-elevate"
+            className="relative h-11 w-11 shrink-0 overflow-visible rounded-xl p-0"
             style={{ transform: "translateZ(0px)", transformStyle: "preserve-3d" }}
           >
             <div
