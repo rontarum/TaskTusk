@@ -67,7 +67,7 @@ function rgbString([r, g, b]: [number, number, number]) {
 
 /** Color stops: 0% → destructive (hot pink), 50% → gold, 100% → primary (mint) */
 const COLOR_0 = "#FF4D94";
-const COLOR_50 = "#EFBD6E";
+const COLOR_50 = "#FFC445"; // "#EFBD6E";
 const COLOR_100 = "#2DD4BF";
 
 const BORDER_WIDTH = 3; // px
