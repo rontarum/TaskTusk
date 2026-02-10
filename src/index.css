@@ -140,6 +140,12 @@ All colors MUST be HSL.
       0px 1px 17.5px 0px hsl(var(--shadow-color) / 0.21);
   }
 
+  @media (max-width: 1359.98px) { /* For screens smaller than 1360px */
+    :root {
+      font-size: 100%;
+    }
+  }
+
   .dark {
     --background:
       222.2 84% 4.9%;
@@ -403,9 +409,11 @@ All colors MUST be HSL.
     0% {
       box-shadow: inset 0 0 0 0 rgba(255, 255, 255, 0);
     }
+
     50% {
       box-shadow: inset 0 0 20px 8px rgba(255, 255, 255, 0.8);
     }
+
     100% {
       box-shadow: inset 0 0 0 0 rgba(255, 255, 255, 0);
     }
@@ -415,9 +423,11 @@ All colors MUST be HSL.
     0% {
       filter: brightness(1);
     }
+
     50% {
       filter: brightness(1.6);
     }
+
     100% {
       filter: brightness(1);
     }

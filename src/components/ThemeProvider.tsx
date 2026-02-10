@@ -17,7 +17,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         }
 
         // Apply font families
-        const fonts = getFontFamilies() as any;
+        const fonts: ThemeFonts = getFontFamilies();
         root.style.setProperty('--font-heading', fonts.families.heading);
         root.style.setProperty('--font-body', fonts.families.body);
         root.style.setProperty('--font-numbers', fonts.families.numbers);

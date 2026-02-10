@@ -7,6 +7,10 @@ interface TiltCardProps extends React.HTMLAttributes<HTMLDivElement> {
     children: React.ReactNode;
 }
 
+interface TiltElement extends HTMLDivElement {
+  vanillaTilt?: { destroy: () => void };
+}
+
 export const TiltCard = React.forwardRef<HTMLDivElement, TiltCardProps>(
     ({ options, children, className, ...props }, ref) => {
         const localRef = React.useRef<HTMLDivElement>(null);
@@ -35,8 +39,8 @@ export const TiltCard = React.forwardRef<HTMLDivElement, TiltCardProps>(
             }
 
             return () => {
-                if (localRef.current && (localRef.current as any).vanillaTilt) {
-                    (localRef.current as any).vanillaTilt.destroy();
+                if (localRef.current && (localRef.current as TiltElement).vanillaTilt) {
+                    (localRef.current as TiltElement).vanillaTilt.destroy();
                 }
             };
         }, [options]);
