@@ -2,12 +2,14 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, PanInfo, useAnimation, AnimatePresence } from 'framer-motion';
 import { Star, Heart, Zap, Trash2, Edit, Copy } from 'lucide-react';
 import { PlannerItem } from '@/components/planner/types';
-import { scoreOf } from '@/components/planner/scoring';
+import { scoreOf, scoreColor } from '@/components/planner/scoring';
 import { ProgressBar } from '@/components/planner/ProgressBar';
 import { cn } from '@/lib/utils';
 
 interface TaskCardProps {
   item: PlannerItem;
+  minScore?: number;
+  maxScore?: number;
   onTap?: (id: string) => void;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
@@ -15,13 +17,14 @@ interface TaskCardProps {
   className?: string;
 }
 
-export const TaskCard = ({ item, onTap, onEdit, onDelete, onDuplicate, className }: TaskCardProps) => {
+export const TaskCard = ({ item, minScore = 0, maxScore = 100, onTap, onEdit, onDelete, onDuplicate, className }: TaskCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [swipeAction, setSwipeAction] = useState<'edit' | 'delete' | null>(null);
   const [showContextMenu, setShowContextMenu] = useState(false);
   const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 });
   const controls = useAnimation();
   const score = scoreOf(item);
+  const color = scoreColor(score, minScore, maxScore);
   const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
@@ -225,7 +228,7 @@ export const TaskCard = ({ item, onTap, onEdit, onDelete, onDuplicate, className
           </h3>
         </div>
         <div className="flex-shrink-0 text-right">
-          <div className="text-2xl font-numbers font-bold text-primary">
+          <div className="text-2xl font-numbers font-bold" style={{ color }}>
             {score.toFixed(0)}
           </div>
         </div>

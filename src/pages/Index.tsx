@@ -335,20 +335,42 @@ const Index = () => {
           </p>
         </footer>
 
-        {/* Mobile FAB */}
+        {/* Mobile FAB and Sort Button */}
         {isMobile && (
-          <motion.button
-            className="fixed bottom-4 right-4 z-30 w-14 h-14 bg-primary text-primary-foreground rounded-2xl shadow-lg flex items-center justify-center"
-            onClick={() => {
-              setMobileFormMode('add');
-              setEditingItem(undefined);
-              setIsMobileFormOpen(true);
-            }}
-            whileTap={{ scale: 0.95 }}
-            whileHover={{ scale: 1.05 }}
-          >
-            <Plus className="w-6 h-6" />
-          </motion.button>
+          <>
+            {/* Sort Button */}
+            <motion.button
+              className={cn(
+                "fixed bottom-4 right-20 z-30 w-14 h-14 rounded-xl shadow-lg flex items-center justify-center transition-colors",
+                sorted ? "bg-primary text-primary-foreground" : "bg-background/80 backdrop-blur-sm text-foreground border border-border"
+              )}
+              onClick={() => setSorted((s) => !s)}
+              disabled={items.length < 2}
+              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.05 }}
+            >
+              <motion.div
+                animate={{ scaleY: sorted ? -1 : 1 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+              >
+                <ArrowDownUp className="w-5 h-5" />
+              </motion.div>
+            </motion.button>
+
+            {/* FAB */}
+            <motion.button
+              className="fixed bottom-4 right-4 z-30 w-14 h-14 bg-primary text-primary-foreground rounded-xl shadow-lg flex items-center justify-center"
+              onClick={() => {
+                setMobileFormMode('add');
+                setEditingItem(undefined);
+                setIsMobileFormOpen(true);
+              }}
+              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.05 }}
+            >
+              <Plus className="w-6 h-6" />
+            </motion.button>
+          </>
         )}
 
         {/* Mobile Menu */}

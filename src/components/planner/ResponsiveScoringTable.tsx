@@ -2,6 +2,7 @@ import { DeviceType } from '@/hooks/use-device';
 import { PlannerScoringTable } from '@/components/planner/PlannerScoringTable';
 import { TaskCard } from '@/components/planner/TaskCard';
 import { PlannerItem } from '@/components/planner/types';
+import { scoreOf } from '@/components/planner/scoring';
 import { motion } from 'framer-motion';
 
 interface ResponsiveScoringTableProps {
@@ -34,6 +35,11 @@ export const ResponsiveScoringTable = ({
   // Mobile: TaskCard grid
   if (isMobile) {
     const orderedItems = order.map((id) => items.find((item) => item.id === id)).filter(Boolean) as PlannerItem[];
+    
+    // Calculate min and max scores for color interpolation (only from actual items)
+    const scores = orderedItems.map(scoreOf);
+    const minScore = scores.length > 0 ? Math.min(...scores) : 0;
+    const maxScore = scores.length > 0 ? Math.max(...scores) : 100;
 
     return (
       <motion.div
@@ -45,6 +51,8 @@ export const ResponsiveScoringTable = ({
           <TaskCard
             key={item.id}
             item={item}
+            minScore={minScore}
+            maxScore={maxScore}
             onTap={onCardTap}
             onEdit={onCardEdit}
             onDelete={onCardDelete}
