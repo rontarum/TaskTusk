@@ -17,6 +17,7 @@ export const BackgroundGradientAnimation = ({
     className,
     interactive = true,
     containerClassName,
+    complexity = 'full',
 }: {
     gradientBackgroundStart?: string;
     gradientBackgroundEnd?: string;
@@ -32,6 +33,7 @@ export const BackgroundGradientAnimation = ({
     className?: string;
     interactive?: boolean;
     containerClassName?: string;
+    complexity?: 'full' | 'reduced' | 'minimal';
 }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const interactiveRef = useRef<HTMLDivElement>(null);
@@ -40,6 +42,21 @@ export const BackgroundGradientAnimation = ({
     const curY = useRef(0);
     const tgX = useRef(0);
     const tgY = useRef(0);
+
+    // Determine which gradients to show based on complexity
+    const showGradients = {
+        first: true,
+        second: complexity !== 'minimal',
+        third: complexity === 'full',
+        fourth: complexity === 'full',
+        fifth: complexity === 'full',
+    };
+
+    // Disable interactive element for reduced/minimal
+    const isInteractive = interactive && complexity === 'full';
+
+    // Disable animations for minimal
+    const animationsEnabled = complexity !== 'minimal';
 
     useEffect(() => {
         document.body.style.setProperty(
@@ -88,14 +105,37 @@ export const BackgroundGradientAnimation = ({
             animationFrameId = requestAnimationFrame(move);
         }
 
-        if (interactive) {
+        if (isInteractive) {
             animationFrameId = requestAnimationFrame(move);
         }
 
         return () => {
             cancelAnimationFrame(animationFrameId);
         };
-    }, [interactive]);
+    }, [isInteractive]);
+
+    // Pause animations when page is hidden
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            if (document.hidden) {
+                // Page is hidden, pause animations
+                if (containerRef.current) {
+                    containerRef.current.style.animationPlayState = 'paused';
+                }
+            } else {
+                // Page is visible, resume animations
+                if (containerRef.current && animationsEnabled) {
+                    containerRef.current.style.animationPlayState = 'running';
+                }
+            }
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
+    }, [animationsEnabled]);
 
     const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
         if (containerRef.current) {
@@ -144,53 +184,63 @@ export const BackgroundGradientAnimation = ({
                     isSafari ? "blur-2xl" : "[filter:url(#blurMe)_blur(40px)]"
                 )}
             >
-                <div
-                    className={cn(
-                        `absolute [background:radial-gradient(circle_at_center,_rgba(var(--first-color),_0.8)_0,_rgba(var(--first-color),_0)_50%)_no-repeat]`,
-                        `[mix-blend-mode:var(--blending-value)] w-[var(--size)] h-[var(--size)] top-[calc(50%-var(--size)/2)] left-[calc(50%-var(--size)/2)]`,
-                        `[transform-origin:center_center]`,
-                        `animate-first`,
-                        `opacity-100`
-                    )}
-                ></div>
-                <div
-                    className={cn(
-                        `absolute [background:radial-gradient(circle_at_center,_rgba(var(--second-color),_0.8)_0,_rgba(var(--second-color),_0)_50%)_no-repeat]`,
-                        `[mix-blend-mode:var(--blending-value)] w-[var(--size)] h-[var(--size)] top-[calc(50%-var(--size)/2)] left-[calc(50%-var(--size)/2)]`,
-                        `[transform-origin:calc(50%-400px)]`,
-                        `animate-second`,
-                        `opacity-100`
-                    )}
-                ></div>
-                <div
-                    className={cn(
-                        `absolute [background:radial-gradient(circle_at_center,_rgba(var(--third-color),_0.8)_0,_rgba(var(--third-color),_0)_50%)_no-repeat]`,
-                        `[mix-blend-mode:var(--blending-value)] w-[var(--size)] h-[var(--size)] top-[calc(50%-var(--size)/2)] left-[calc(50%-var(--size)/2)]`,
-                        `[transform-origin:calc(50%+400px)]`,
-                        `animate-third`,
-                        `opacity-100`
-                    )}
-                ></div>
-                <div
-                    className={cn(
-                        `absolute [background:radial-gradient(circle_at_center,_rgba(var(--fourth-color),_0.8)_0,_rgba(var(--fourth-color),_0)_50%)_no-repeat]`,
-                        `[mix-blend-mode:var(--blending-value)] w-[var(--size)] h-[var(--size)] top-[calc(50%-var(--size)/2)] left-[calc(50%-var(--size)/2)]`,
-                        `[transform-origin:calc(50%-200px)]`,
-                        `animate-fourth`,
-                        `opacity-70`
-                    )}
-                ></div>
-                <div
-                    className={cn(
-                        `absolute [background:radial-gradient(circle_at_center,_rgba(var(--fifth-color),_0.8)_0,_rgba(var(--fifth-color),_0)_50%)_no-repeat]`,
-                        `[mix-blend-mode:var(--blending-value)] w-[var(--size)] h-[var(--size)] top-[calc(50%-var(--size)/2)] left-[calc(50%-var(--size)/2)]`,
-                        `[transform-origin:calc(50%-800px)_calc(50%+800px)]`,
-                        `animate-fifth`,
-                        `opacity-100`
-                    )}
-                ></div>
+                {showGradients.first && (
+                    <div
+                        className={cn(
+                            `absolute [background:radial-gradient(circle_at_center,_rgba(var(--first-color),_0.8)_0,_rgba(var(--first-color),_0)_50%)_no-repeat]`,
+                            `[mix-blend-mode:var(--blending-value)] w-[var(--size)] h-[var(--size)] top-[calc(50%-var(--size)/2)] left-[calc(50%-var(--size)/2)]`,
+                            `[transform-origin:center_center]`,
+                            animationsEnabled && `animate-first`,
+                            `opacity-100`
+                        )}
+                    ></div>
+                )}
+                {showGradients.second && (
+                    <div
+                        className={cn(
+                            `absolute [background:radial-gradient(circle_at_center,_rgba(var(--second-color),_0.8)_0,_rgba(var(--second-color),_0)_50%)_no-repeat]`,
+                            `[mix-blend-mode:var(--blending-value)] w-[var(--size)] h-[var(--size)] top-[calc(50%-var(--size)/2)] left-[calc(50%-var(--size)/2)]`,
+                            `[transform-origin:calc(50%-400px)]`,
+                            animationsEnabled && `animate-second`,
+                            `opacity-100`
+                        )}
+                    ></div>
+                )}
+                {showGradients.third && (
+                    <div
+                        className={cn(
+                            `absolute [background:radial-gradient(circle_at_center,_rgba(var(--third-color),_0.8)_0,_rgba(var(--third-color),_0)_50%)_no-repeat]`,
+                            `[mix-blend-mode:var(--blending-value)] w-[var(--size)] h-[var(--size)] top-[calc(50%-var(--size)/2)] left-[calc(50%-var(--size)/2)]`,
+                            `[transform-origin:calc(50%+400px)]`,
+                            animationsEnabled && `animate-third`,
+                            `opacity-100`
+                        )}
+                    ></div>
+                )}
+                {showGradients.fourth && (
+                    <div
+                        className={cn(
+                            `absolute [background:radial-gradient(circle_at_center,_rgba(var(--fourth-color),_0.8)_0,_rgba(var(--fourth-color),_0)_50%)_no-repeat]`,
+                            `[mix-blend-mode:var(--blending-value)] w-[var(--size)] h-[var(--size)] top-[calc(50%-var(--size)/2)] left-[calc(50%-var(--size)/2)]`,
+                            `[transform-origin:calc(50%-200px)]`,
+                            animationsEnabled && `animate-fourth`,
+                            `opacity-70`
+                        )}
+                    ></div>
+                )}
+                {showGradients.fifth && (
+                    <div
+                        className={cn(
+                            `absolute [background:radial-gradient(circle_at_center,_rgba(var(--fifth-color),_0.8)_0,_rgba(var(--fifth-color),_0)_50%)_no-repeat]`,
+                            `[mix-blend-mode:var(--blending-value)] w-[var(--size)] h-[var(--size)] top-[calc(50%-var(--size)/2)] left-[calc(50%-var(--size)/2)]`,
+                            `[transform-origin:calc(50%-800px)_calc(50%+800px)]`,
+                            animationsEnabled && `animate-fifth`,
+                            `opacity-100`
+                        )}
+                    ></div>
+                )}
 
-                {interactive && (
+                {isInteractive && (
                     <div
                         ref={interactiveRef}
                         className={cn(

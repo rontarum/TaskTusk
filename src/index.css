@@ -10,8 +10,30 @@ All colors MUST be HSL.
 */
 
 @layer base {
+  /* Responsive font sizing */
   :root {
-    font-size: 125%;
+    font-size: 125%; /* Desktop: 20px base */
+  }
+
+  @media (max-width: 1023px) {
+    :root {
+      font-size: 100%; /* Below desktop: 16px base */
+    }
+  }
+
+  @media (min-width: 640px) and (max-width: 1023px) {
+    :root {
+      font-size: 112.5%; /* Tablet: 18px base */
+    }
+  }
+
+  @media (max-width: 639px) {
+    :root {
+      font-size: 100%; /* Mobile: 16px base */
+    }
+  }
+
+  :root {
     --background:
       0 0% 93%;
     --foreground:
