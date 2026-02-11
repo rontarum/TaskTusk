@@ -28,14 +28,12 @@ export const ResponsiveHeader = ({
     <motion.header
       className={cn(
         'sticky top-0 z-50 border-b border-border/40 bg-background/45 backdrop-blur-md',
+        height,
         className
       )}
-      animate={{ 
-        height: isMobile ? 56 : isTablet ? 60 : 64,
-      }}
       transition={{ duration: 0.3, ease: 'easeInOut' }}
     >
-      <div className={cn('mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8', height)}>
+      <div className="mx-auto flex h-full w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         {/* Left: Logo + Title */}
         <div className="flex min-w-0 items-center gap-3">
           <div className={cn(
