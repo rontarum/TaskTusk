@@ -50,6 +50,22 @@ export const MobileTaskForm = ({
     }
   }, [initialData]);
 
+  const handleInputFocus = () => {
+    // Scroll input into view smoothly when keyboard appears
+    if (inputRef.current && window.visualViewport) {
+      const rect = inputRef.current.getBoundingClientRect();
+      const viewportHeight = window.visualViewport.height;
+      
+      // If input is below keyboard, scroll it into view
+      if (rect.bottom > viewportHeight) {
+        inputRef.current.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' 
+        });
+      }
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -87,7 +103,14 @@ export const MobileTaskForm = ({
 
   return (
     <BottomSheet isOpen={isOpen} onClose={onClose} fullScreen>
-      <div className="p-6 pb-8">
+      <div 
+        className="p-6 pb-8" 
+        style={{ 
+          height: '100dvh',
+          overflow: 'auto',
+          overscrollBehavior: 'contain'
+        }}
+      >
         <h2 className="text-2xl font-heading font-semibold mb-6">
           {mode === 'add' ? 'Новый таск' : 'Изменить таск'}
         </h2>
@@ -103,6 +126,7 @@ export const MobileTaskForm = ({
                 setText(e.target.value);
                 setError('');
               }}
+              onFocus={handleInputFocus}
               onKeyDown={handleKeyDown}
               placeholder="Назови таск"
               className="text-base"
@@ -114,7 +138,7 @@ export const MobileTaskForm = ({
 
           {/* Emoji picker button */}
           <div>
-            <label className="block text-sm font-medium mb-2">Эмодзи</label>
+            <label className="block text-sm font-medium mb-2">Значок</label>
             <button
               type="button"
               className="flex items-center justify-center p-3 border border-border rounded-2xl hover:bg-muted transition-colors w-14 h-14"
@@ -126,7 +150,7 @@ export const MobileTaskForm = ({
 
           {/* Priority slider */}
           <TouchSlider
-            min={1}
+            min={0}
             max={10}
             step={1}
             value={priority}
@@ -146,7 +170,7 @@ export const MobileTaskForm = ({
 
           {/* Difficulty slider */}
           <TouchSlider
-            min={1}
+            min={0}
             max={10}
             step={1}
             value={difficulty}

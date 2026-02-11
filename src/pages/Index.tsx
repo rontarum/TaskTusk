@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { useLocalStorageState } from "@/hooks/useLocalStorageState";
 import { useDevice } from "@/hooks/use-device";
 import { useMobileSettings } from "@/hooks/use-mobile-settings";
-import { ArrowDownUp, Download, LayoutGrid, Trash2, Upload, Plus } from "lucide-react";
+import { useMobileOptimizations } from "@/hooks/useMobileOptimizations";
+import { ArrowDownUp, Download, Trash2, Upload, Plus } from "lucide-react";
 import { PlannerItemForm } from "@/components/planner/PlannerItemForm";
 import { PlannerItemList } from "@/components/planner/PlannerItemList";
 import { ResponsiveScoringTable } from "@/components/planner/ResponsiveScoringTable";
@@ -40,6 +41,7 @@ const Index = () => {
   
   const deviceInfo = useDevice();
   const { settings } = useMobileSettings();
+  useMobileOptimizations(); // Apply mobile optimizations
   const isMobile = deviceInfo.type === 'mobile';
   const isDesktop = deviceInfo.type === 'desktop';
 
@@ -193,7 +195,7 @@ const Index = () => {
       containerClassName="min-h-screen app-bg bg-transparent"
       complexity={bgComplexity}
     >
-      <div className="absolute inset-0 z-10 flex flex-col overflow-auto">
+      <div className="absolute inset-0 z-10 flex flex-col overflow-x-hidden overflow-y-auto">
         <ResponsiveHeader
           deviceType={deviceInfo.type}
           onMenuToggle={() => setIsMobileMenuOpen(true)}
@@ -323,6 +325,7 @@ const Index = () => {
                 onCardEdit={handleCardEdit}
                 onCardDelete={deleteItem}
                 onCardDuplicate={duplicateItem}
+                isFormOpen={isMobileFormOpen}
               />
             </section>
           </div>

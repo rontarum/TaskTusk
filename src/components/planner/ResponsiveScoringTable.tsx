@@ -15,6 +15,7 @@ interface ResponsiveScoringTableProps {
   onCardEdit?: (id: string) => void;
   onCardDelete?: (id: string) => void;
   onCardDuplicate?: (id: string) => void;
+  isFormOpen?: boolean;
 }
 
 export const ResponsiveScoringTable = ({
@@ -27,6 +28,7 @@ export const ResponsiveScoringTable = ({
   onCardEdit,
   onCardDelete,
   onCardDuplicate,
+  isFormOpen,
 }: ResponsiveScoringTableProps) => {
   const isMobile = deviceType === 'mobile';
   const isTablet = deviceType === 'tablet';
@@ -57,6 +59,7 @@ export const ResponsiveScoringTable = ({
             onEdit={onCardEdit}
             onDelete={onCardDelete}
             onDuplicate={onCardDuplicate}
+            isFormOpen={isFormOpen}
           />
         ))}
       </motion.div>

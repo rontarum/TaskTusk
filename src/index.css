@@ -482,3 +482,68 @@ All colors MUST be HSL.
     color: white !important;
   }
 }
+
+/* Mobile-specific optimizations */
+@media (max-width: 1023px) {
+  html, body {
+    overflow-x: hidden;
+    overscroll-behavior-x: none;
+    width: 100%;
+    position: relative;
+  }
+  
+  /* Prevent pull-to-refresh on mobile */
+  body {
+    overscroll-behavior-y: contain;
+  }
+  
+  /* Use dynamic viewport units for mobile */
+  :root {
+    --vh: 1dvh;
+    --vw: 1dvw;
+  }
+  
+  /* Disable double-tap zoom */
+  * {
+    touch-action: manipulation;
+  }
+  
+  /* Allow specific elements to have custom touch behavior */
+  .swipeable {
+    touch-action: pan-y;
+  }
+  
+  .draggable-handle {
+    touch-action: none;
+  }
+  
+  /* GPU acceleration for animations */
+  .paper,
+  .bottom-sheet {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+  
+  /* Mobile optimizations class */
+  .mobile-optimized {
+    --parallax-enabled: 0;
+  }
+  
+  .mobile-optimized .parallax-layer {
+    transform: none !important;
+  }
+  
+  .mobile-optimized .paper,
+  .mobile-optimized .bottom-sheet {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+}
+
+/* Mobile horizontal scroll prevention */
+@media (max-width: 1023px) {
+  html, body {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+}

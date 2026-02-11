@@ -34,7 +34,10 @@ export const TouchSlider = ({
     if (!trackRef.current) return value;
 
     const rect = trackRef.current.getBoundingClientRect();
-    const percentage = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    const padding = 12; // px-3 = 12px padding on each side
+    const effectiveWidth = rect.width - padding * 2;
+    const offsetX = clientX - rect.left - padding;
+    const percentage = Math.max(0, Math.min(1, offsetX / effectiveWidth));
     const rawValue = min + percentage * (max - min);
     const steppedValue = Math.round(rawValue / step) * step;
     
@@ -123,27 +126,29 @@ export const TouchSlider = ({
       {/* Track */}
       <div
         ref={trackRef}
-        className="relative h-12 flex items-center cursor-pointer"
+        className="relative h-12 flex items-center cursor-pointer px-3"
         onMouseDown={handleMouseDown}
         onTouchStart={handleTouchStart}
       >
         {/* Background track */}
-        <div className="absolute inset-x-0 h-2 bg-muted rounded-full" />
+        <div className="absolute inset-x-3 h-2 bg-muted rounded-full" />
 
-        {/* Active track */}
-        <div
-          className="absolute left-0 h-2 bg-primary rounded-full transition-all"
-          style={{ width: `${percentage}%` }}
+        {/* Active track - width scales with percentage within padded area */}
+        <motion.div
+          className="absolute left-3 h-2 bg-primary rounded-full"
+          animate={{ width: `calc((100% - 24px) * ${percentage / 100})` }}
+          transition={{ type: 'spring', stiffness: 400, damping: 30, mass: 0.5 }}
         />
 
-        {/* Thumb */}
+        {/* Thumb - positioned within padded area */}
         <motion.div
-          className="absolute w-6 h-6 -ml-3 bg-primary rounded-full shadow-lg flex items-center justify-center"
-          style={{ left: `${percentage}%` }}
+          className="absolute w-6 h-6 bg-primary rounded-full shadow-lg flex items-center justify-center"
+          style={{ marginLeft: '-12px' }}
           animate={{
+            left: `calc(12px + (100% - 24px) * ${percentage / 100})`,
             scale: isDragging ? 1.3 : 1,
           }}
-          transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 30, mass: 0.5 }}
         >
           {/* Value display during drag */}
           {isDragging && (

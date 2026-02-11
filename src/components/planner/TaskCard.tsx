@@ -15,18 +15,59 @@ interface TaskCardProps {
   onDelete?: (id: string) => void;
   onDuplicate?: (id: string) => void;
   className?: string;
+  isFormOpen?: boolean;
 }
 
-export const TaskCard = ({ item, minScore = 0, maxScore = 100, onTap, onEdit, onDelete, onDuplicate, className }: TaskCardProps) => {
+interface SwipeState {
+  isDragging: boolean;
+  direction: 'horizontal' | 'vertical' | null;
+  startX: number;
+  startY: number;
+}
+
+export const TaskCard = ({ item, minScore = 0, maxScore = 100, onTap, onEdit, onDelete, onDuplicate, className, isFormOpen }: TaskCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [swipeAction, setSwipeAction] = useState<'edit' | 'delete' | null>(null);
   const [showContextMenu, setShowContextMenu] = useState(false);
   const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 });
+  const [swipeState, setSwipeState] = useState<SwipeState>({
+    isDragging: false,
+    direction: null,
+    startX: 0,
+    startY: 0,
+  });
   const controls = useAnimation();
+  const cardRef = useRef<HTMLDivElement>(null);
+  const prevItemRef = useRef<PlannerItem>(item);
+  const prevFormOpenRef = useRef(isFormOpen);
   const score = scoreOf(item);
   const color = scoreColor(score, minScore, maxScore);
   const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+
+  // Reset card position when item data changes (after edit closes)
+  useEffect(() => {
+    // Check if item actually changed (not just re-render)
+    if (prevItemRef.current.text !== item.text || 
+        prevItemRef.current.emoji !== item.emoji ||
+        prevItemRef.current.priority !== item.priority ||
+        prevItemRef.current.desire !== item.desire ||
+        prevItemRef.current.difficulty !== item.difficulty ||
+        prevItemRef.current.percent !== item.percent) {
+      controls.start({ x: 0 });
+      setSwipeAction(null);
+      prevItemRef.current = item;
+    }
+  }, [item, controls]);
+
+  // Reset position when form closes (isFormOpen changes from true to false)
+  useEffect(() => {
+    if (prevFormOpenRef.current === true && isFormOpen === false) {
+      controls.start({ x: 0 });
+      setSwipeAction(null);
+    }
+    prevFormOpenRef.current = isFormOpen;
+  }, [isFormOpen, controls]);
 
   const handleTap = () => {
     if (showContextMenu) {
@@ -85,62 +126,106 @@ export const TaskCard = ({ item, minScore = 0, maxScore = 100, onTap, onEdit, on
     };
   }, []);
 
-  const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    const velocity = Math.abs(info.velocity.x);
-    const offset = info.offset.x;
+  const handleDragStart = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    setSwipeState({
+      isDragging: true,
+      direction: null,
+      startX: info.point.x,
+      startY: info.point.y,
+    });
+  };
 
-    // Execute action if swiped far enough with sufficient velocity
-    if (Math.abs(offset) > 100 && velocity > 500) {
+  const handleDrag = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    const deltaX = Math.abs(info.point.x - swipeState.startX);
+    const deltaY = Math.abs(info.point.y - swipeState.startY);
+    
+    // Directional locking after 15px movement
+    if (!swipeState.direction && (deltaX > 15 || deltaY > 15)) {
+      const direction = deltaX > deltaY ? 'horizontal' : 'vertical';
+      setSwipeState(prev => ({ ...prev, direction }));
+      
+      // If vertical, cancel drag and allow scroll
+      if (direction === 'vertical') {
+        controls.start({ x: 0 });
+        setSwipeAction(null);
+        return;
+      }
+    }
+    
+    // Only process horizontal swipes
+    if (swipeState.direction === 'horizontal') {
+      const offset = info.offset.x;
+      
+      // Show action hint at 30px
+      if (offset < -30) {
+        setSwipeAction('delete');
+      } else if (offset > 30) {
+        setSwipeAction('edit');
+      } else {
+        setSwipeAction(null);
+      }
+    }
+  };
+
+  const handleDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    const offset = info.offset.x;
+    const cardWidth = cardRef.current?.getBoundingClientRect().width || 300;
+    const threshold = cardWidth * 0.5; // 50% of card width
+    
+    // Trigger action if past threshold (regardless of velocity)
+    if (Math.abs(offset) > threshold && swipeState.direction === 'horizontal') {
       if (offset < 0 && onDelete) {
-        // Swipe left → delete
-        onDelete(item.id);
+        // Delete: fade indicator quickly, then animate card off
+        setSwipeAction(null);
+        controls.start({ 
+          x: -cardWidth, 
+          opacity: 0,
+          transition: { duration: 0.2, ease: 'easeOut' }
+        }).then(() => {
+          onDelete(item.id);
+        });
         return;
       } else if (offset > 0 && onEdit) {
-        // Swipe right → edit
+        // Edit: stay at offset position during edit
+        controls.start({ x: 150 });
         onEdit(item.id);
         return;
       }
     }
-
-    // Snap back if not executed
+    
+    // Snap back if not triggered
     controls.start({ x: 0 });
     setSwipeAction(null);
-  };
-
-  const handleDrag = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    const offset = info.offset.x;
-    
-    // Show action hint when swiped > 30px (earlier feedback)
-    if (offset < -30) {
-      setSwipeAction('delete');
-    } else if (offset > 30) {
-      setSwipeAction('edit');
-    } else {
-      setSwipeAction(null);
-    }
+    setSwipeState({ isDragging: false, direction: null, startX: 0, startY: 0 });
   };
 
   return (
     <div className="relative">
       {/* Background action indicators */}
-      {swipeAction === 'delete' && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="absolute inset-0 -inset-y-0.5 bg-destructive rounded-3xl flex items-center justify-end px-6"
-        >
-          <Trash2 className="w-6 h-6 text-destructive-foreground" />
-        </motion.div>
-      )}
-      {swipeAction === 'edit' && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="absolute inset-0 -inset-y-0.5 bg-primary rounded-3xl flex items-center justify-start px-6"
-        >
-          <Edit className="w-6 h-6 text-primary-foreground" />
-        </motion.div>
-      )}
+      <AnimatePresence>
+        {swipeAction === 'delete' && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15, ease: 'easeOut' }}
+            className="absolute inset-0 -inset-y-0.5 bg-destructive rounded-3xl flex items-center justify-end px-6"
+          >
+            <Trash2 className="w-6 h-6 text-destructive-foreground" />
+          </motion.div>
+        )}
+        {swipeAction === 'edit' && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="absolute inset-0 -inset-y-0.5 bg-primary rounded-3xl flex items-center justify-start px-6"
+          >
+            <Edit className="w-6 h-6 text-primary-foreground" />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Context Menu */}
       {showContextMenu && (
@@ -201,10 +286,14 @@ export const TaskCard = ({ item, minScore = 0, maxScore = 100, onTap, onEdit, on
 
       {/* Card */}
       <motion.div
-        layout
+        ref={cardRef}
+        layout="position"
         drag="x"
-        dragConstraints={{ left: -120, right: 120 }}
+        dragConstraints={{ left: -150, right: 150 }}
         dragElastic={0.2}
+        dragDirectionLock={true}
+        dragPropagation={false}
+        onDragStart={handleDragStart}
         onDrag={handleDrag}
         onDragEnd={handleDragEnd}
         animate={controls}
@@ -214,16 +303,17 @@ export const TaskCard = ({ item, minScore = 0, maxScore = 100, onTap, onEdit, on
         onMouseDown={handleLongPressStart}
         onMouseUp={handleLongPressEnd}
         onMouseMove={handleLongPressMove}
-        className={cn('paper p-4 cursor-pointer select-none relative z-10', className)}
+        className={cn('paper p-4 cursor-pointer relative z-10 swipeable', className)}
         onClick={handleTap}
         whileTap={{ scale: 0.98 }}
         transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+        style={{ userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
       >
       {/* Header: Emoji + Name + Score */}
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <span className="text-2xl flex-shrink-0">{item.emoji}</span>
-          <h3 className="font-heading font-semibold text-base line-clamp-2 break-words">
+          <h3 className="font-heading font-semibold text-lg line-clamp-2 break-words">
             {item.text}
           </h3>
         </div>
@@ -241,47 +331,62 @@ export const TaskCard = ({ item, minScore = 0, maxScore = 100, onTap, onEdit, on
 
       {/* Visual Indicators (compact) */}
       {!isExpanded && (
-        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+        <div className="flex items-center gap-4 text-sm text-muted-foreground font-semibold">
           <div className="flex items-center gap-1">
-            <Star className="w-4 h-4" />
-            <span className="font-numbers">{item.priority}</span>
+            <Star className="w-4 h-4" strokeWidth={2.5} />
+            <span className="font-numbers font-bold">{item.priority}</span>
           </div>
           <div className="flex items-center gap-1">
-            <Heart className="w-4 h-4" />
-            <span className="font-numbers">{item.desire}</span>
+            <Heart className="w-4 h-4" strokeWidth={2.5} />
+            <span className="font-numbers font-bold">{item.desire}</span>
           </div>
           <div className="flex items-center gap-1">
-            <Zap className="w-4 h-4" />
-            <span className="font-numbers">{item.difficulty}</span>
+            <Zap className="w-4 h-4" strokeWidth={2.5} />
+            <span className="font-numbers font-bold">{item.difficulty}</span>
           </div>
         </div>
       )}
 
       {/* Expanded Details */}
-      <AnimatePresence>
+      <AnimatePresence initial={false}>
         {isExpanded && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2, ease: 'easeInOut' }}
-            className="space-y-2 pt-2 border-t border-border overflow-hidden"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ 
+              height: 'auto',
+              opacity: 1,
+              transition: {
+                height: { duration: 0.2, ease: [0.4, 0, 0.2, 1] },
+                opacity: { duration: 0.15, delay: 0.05 }
+              }
+            }}
+            exit={{ 
+              opacity: 0,
+              height: 0,
+              transition: {
+                opacity: { duration: 0.1 },
+                height: { duration: 0.2, delay: 0.05, ease: [0.4, 0, 0.2, 1] }
+              }
+            }}
+            className="overflow-hidden"
           >
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">ВАЖНО</span>
-              <span className="text-sm font-numbers font-semibold">{item.priority}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">ХОЧУ</span>
-              <span className="text-sm font-numbers font-semibold">{item.desire}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">СЛОЖНО</span>
-              <span className="text-sm font-numbers font-semibold">{item.difficulty}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">ПРОЦЕНТ</span>
-              <span className="text-sm font-numbers font-semibold">{item.percent}%</span>
+            <div className="space-y-2 pt-2 border-t border-border">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground font-semibold">ВАЖНО?</span>
+                <span className="text-sm font-numbers font-bold">{item.priority}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground font-semibold">ХОЧУ?</span>
+                <span className="text-sm font-numbers font-bold">{item.desire}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground font-semibold">СЛОЖНО?</span>
+                <span className="text-sm font-numbers font-bold">{item.difficulty}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground font-semibold">ГОТОВО%</span>
+                <span className="text-sm font-numbers font-bold">{item.percent}%</span>
+              </div>
             </div>
           </motion.div>
         )}

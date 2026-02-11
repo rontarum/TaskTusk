@@ -14,8 +14,9 @@ interface MobileSettingsPanelProps {
 export const MobileSettingsPanel = ({ isOpen, onClose }: MobileSettingsPanelProps) => {
   const { settings, updateSetting, resetToDefaults } = useMobileSettings();
   const { capabilities, type: deviceType } = useDevice();
+  const isMobile = deviceType === 'mobile';
 
-  const showLowEndWarning = settings.enhancedEffects && deviceType === 'mobile';
+  const showLowEndWarning = settings.enhancedEffects && isMobile;
 
   return (
     <BottomSheet isOpen={isOpen} onClose={onClose}>
@@ -74,8 +75,8 @@ export const MobileSettingsPanel = ({ isOpen, onClose }: MobileSettingsPanelProp
               </div>
             )}
 
-            {/* Gyroscope Tilt */}
-            {capabilities.gyroscope && (
+            {/* Gyroscope Tilt - Hidden on mobile */}
+            {capabilities.gyroscope && !isMobile && (
               <div className="flex items-center justify-between">
                 <div className="flex-1">
                   <Label htmlFor="gyroscope-tilt" className="text-base font-medium">

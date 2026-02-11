@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { Menu } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { DonateButton } from '@/components/DonateButton';
@@ -25,33 +24,32 @@ export const ResponsiveHeader = ({
   const height = isMobile ? 'h-14' : isTablet ? 'h-[60px]' : 'h-16';
 
   return (
-    <motion.header
+    <header
       className={cn(
-        'sticky top-0 z-50 border-b border-border/40 bg-background/45 backdrop-blur-md',
+        'sticky top-0 z-50 border-b border-border/40 bg-background/45 backdrop-blur-md flex-shrink-0',
         height,
         className
       )}
-      transition={{ duration: 0.3, ease: 'easeInOut' }}
     >
       <div className="mx-auto flex h-full w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         {/* Left: Logo + Title */}
         <div className="flex min-w-0 items-center gap-3">
           <div className={cn(
-            'flex items-center justify-center overflow-hidden',
+            'flex items-center justify-center overflow-hidden flex-shrink-0',
             isMobile ? 'h-8 w-8' : 'h-10 w-10'
           )}>
             <img src="/icon.png" alt="" className="h-full w-full object-contain" />
           </div>
           <div className="min-w-0">
             <h1 className={cn(
-              'font-semibold font-heading',
+              'font-semibold font-heading whitespace-nowrap',
               isMobile ? 'text-sm' : 'text-base'
             )}>
               TASKTUSK
             </h1>
             {/* Hide tagline on mobile */}
             {!isMobile && (
-              <p className="text-xs text-muted-foreground font-body">
+              <p className="text-xs text-muted-foreground font-body whitespace-nowrap">
                 Выполняй задачи в верном порядке
               </p>
             )}
@@ -59,11 +57,9 @@ export const ResponsiveHeader = ({
         </div>
 
         {/* Right: Actions */}
-        <div className="flex shrink-0 items-center gap-2 h-full">
+        <div className="flex shrink-0 items-center gap-2">
           <DonateButton />
-          <div className="flex items-center">
-            <ThemeToggle />
-          </div>
+          <ThemeToggle />
           
           {/* Hamburger menu (mobile only) */}
           {isMobile && onMenuToggle && (
@@ -77,6 +73,6 @@ export const ResponsiveHeader = ({
           )}
         </div>
       </div>
-    </motion.header>
+    </header>
   );
 };
