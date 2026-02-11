@@ -23,8 +23,21 @@ export const TouchSlider = ({
 }: TouchSliderProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const [displayValue, setDisplayValue] = useState(value);
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
   const trackRef = useRef<HTMLDivElement>(null);
   const lastVibrateRef = useRef<number>(value);
+
+  // Detect mobile viewport (< 1024px) for mobile-specific touch behaviors
+  useEffect(() => {
+    const checkViewport = () => {
+      setIsMobileViewport(window.innerWidth < 1024);
+    };
+    
+    checkViewport();
+    window.addEventListener('resize', checkViewport);
+    
+    return () => window.removeEventListener('resize', checkViewport);
+  }, []);
 
   useEffect(() => {
     setDisplayValue(value);
@@ -82,10 +95,18 @@ export const TouchSlider = ({
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
+    // Only apply mobile-specific event isolation on mobile viewports
+    if (isMobileViewport) {
+      e.stopPropagation(); // Prevent event bubbling to parent containers
+    }
     handleStart(e.touches[0].clientX);
   };
 
   const handleTouchMove = (e: TouchEvent) => {
+    // Only prevent default scroll on mobile viewports
+    if (isMobileViewport) {
+      e.preventDefault(); // Prevent default scroll behavior
+    }
     if (isDragging && e.touches.length > 0) {
       handleMove(e.touches[0].clientX);
     }
@@ -101,7 +122,8 @@ export const TouchSlider = ({
     if (isDragging) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
-      document.addEventListener('touchmove', handleTouchMove);
+      // Only use passive: false on mobile viewports where we need preventDefault
+      document.addEventListener('touchmove', handleTouchMove, { passive: !isMobileViewport });
       document.addEventListener('touchend', handleTouchEnd);
 
       return () => {
@@ -111,7 +133,7 @@ export const TouchSlider = ({
         document.removeEventListener('touchend', handleTouchEnd);
       };
     }
-  }, [isDragging, displayValue]);
+  }, [isDragging, displayValue, isMobileViewport]);
 
   const percentage = ((displayValue - min) / (max - min)) * 100;
 
@@ -126,7 +148,8 @@ export const TouchSlider = ({
       {/* Track */}
       <div
         ref={trackRef}
-        className="relative h-12 flex items-center cursor-pointer px-3"
+        className="relative h-12 flex items-center cursor-pointer px-3 touch-slider-track"
+        style={{ touchAction: isMobileViewport ? 'none' : 'auto' }}
         onMouseDown={handleMouseDown}
         onTouchStart={handleTouchStart}
       >

@@ -31,13 +31,61 @@ export const MobileTaskForm = ({
   const [percent, setPercent] = useState(initialData?.percent || 0);
   const [error, setError] = useState('');
   const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Detect mobile viewport (< 1024px) for mobile-specific behaviors
+  useEffect(() => {
+    const checkViewport = () => {
+      setIsMobileViewport(window.innerWidth < 1024);
+    };
+    
+    checkViewport();
+    window.addEventListener('resize', checkViewport);
+    
+    return () => window.removeEventListener('resize', checkViewport);
+  }, []);
 
   useEffect(() => {
     if (isOpen && inputRef.current) {
       setTimeout(() => inputRef.current?.focus(), 100);
     }
   }, [isOpen]);
+
+  // Visual Viewport integration for keyboard handling (mobile-only)
+  useEffect(() => {
+    if (!isOpen || !isMobileViewport) return;
+
+    const visualViewport = window.visualViewport;
+    if (!visualViewport) return;
+
+    const handleResize = () => {
+      // Calculate keyboard height by comparing window height to visual viewport height
+      const windowHeight = window.innerHeight;
+      const viewportHeight = visualViewport.height;
+      const keyboardVisible = windowHeight > viewportHeight;
+      
+      if (keyboardVisible) {
+        const calculatedKeyboardHeight = windowHeight - viewportHeight;
+        setKeyboardHeight(calculatedKeyboardHeight);
+      } else {
+        setKeyboardHeight(0);
+      }
+    };
+
+    visualViewport.addEventListener('resize', handleResize);
+    visualViewport.addEventListener('scroll', handleResize);
+
+    // Initial check
+    handleResize();
+
+    return () => {
+      visualViewport.removeEventListener('resize', handleResize);
+      visualViewport.removeEventListener('scroll', handleResize);
+    };
+  }, [isOpen, isMobileViewport]);
 
   useEffect(() => {
     if (initialData) {
@@ -51,18 +99,29 @@ export const MobileTaskForm = ({
   }, [initialData]);
 
   const handleInputFocus = () => {
-    // Scroll input into view smoothly when keyboard appears
-    if (inputRef.current && window.visualViewport) {
-      const rect = inputRef.current.getBoundingClientRect();
-      const viewportHeight = window.visualViewport.height;
-      
-      // If input is below keyboard, scroll it into view
-      if (rect.bottom > viewportHeight) {
-        inputRef.current.scrollIntoView({ 
+    // Scroll input into view when keyboard appears (mobile-only)
+    if (!isMobileViewport) return;
+    
+    if (inputRef.current && containerRef.current) {
+      // Use a slight delay to ensure keyboard is visible and viewport has resized
+      setTimeout(() => {
+        inputRef.current?.scrollIntoView({ 
           behavior: 'smooth', 
-          block: 'center' 
+          block: 'start',
+          inline: 'nearest'
         });
-      }
+        
+        // Ensure the Save button remains accessible by scrolling container
+        // This helps when keyboard covers the bottom portion
+        const container = containerRef.current;
+        if (container) {
+          const scrollPadding = 100; // Extra space to ensure Save button visibility
+          container.scrollTop = Math.min(
+            container.scrollTop,
+            container.scrollHeight - container.clientHeight - scrollPadding
+          );
+        }
+      }, 300);
     }
   };
 
@@ -104,11 +163,15 @@ export const MobileTaskForm = ({
   return (
     <BottomSheet isOpen={isOpen} onClose={onClose} fullScreen>
       <div 
-        className="p-6 pb-8" 
+        ref={containerRef}
+        className="p-6" 
         style={{ 
           height: '100dvh',
+          paddingBottom: isMobileViewport 
+            ? `max(env(safe-area-inset-bottom), ${80 + keyboardHeight}px)` 
+            : 'env(safe-area-inset-bottom, 80px)',
           overflow: 'auto',
-          overscrollBehavior: 'contain'
+          overscrollBehavior: isMobileViewport ? 'contain' : 'auto'
         }}
       >
         <h2 className="text-2xl font-heading font-semibold mb-6">

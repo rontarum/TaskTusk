@@ -517,6 +517,17 @@ All colors MUST be HSL.
     touch-action: none;
   }
   
+  /* Touch slider isolation - prevents page scroll during slider interaction */
+  .touch-slider-track {
+    touch-action: none;
+  }
+  
+  /* Bottom sheet content - allows vertical scroll but prevents overscroll chaining */
+  .bottom-sheet-content {
+    touch-action: pan-y;
+    overscroll-behavior: contain;
+  }
+  
   /* GPU acceleration for animations */
   .paper,
   .bottom-sheet {

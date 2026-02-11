@@ -2,127 +2,73 @@
 
 ## Introduction
 
-This specification addresses critical mobile UI/UX issues in the TaskTusk application that affect usability on mobile devices (iOS Safari, Chrome Mobile, Firefox Mobile). The issues include keyboard interference with UI layout, unwanted horizontal scrolling, buggy bottom sheet interactions, inconsistent swipe gestures on task cards, animation performance problems, and scroll propagation through modal overlays.
+This document specifies requirements for fixing critical mobile UI issues in the TaskTusk task planner application. The application is a React + TypeScript task prioritization planner with mobile bottom sheet menus. The desktop version functions correctly and must remain unchanged. These fixes target four specific mobile interaction problems that degrade user experience on mobile browsers (Safari, Chrome mobile).
 
 ## Glossary
 
-- **Mobile_UI**: The user interface components and interactions specifically designed for mobile devices (screen width < 1024px)
-- **Bottom_Sheet**: A modal component that slides up from the bottom of the screen with a drag handle for dismissal
-- **Task_Card**: A swipeable card component representing a single task item in the mobile view
-- **Keyboard_Viewport**: The visible area of the screen when the virtual keyboard is displayed on mobile devices
-- **Swipe_Gesture**: A touch interaction where the user drags their finger across the screen to trigger an action
-- **Scroll_Lock**: Prevention of background content scrolling when a modal or overlay is active
-- **Browser_Back_Button**: The native browser navigation button (e.g., Safari back button) that should close modal overlays
+- **Bottom_Sheet**: A modal UI component that slides up from the bottom of the screen, used for mobile forms and menus
+- **Card_Settings_Sheet**: The bottom sheet that opens when editing a task card on mobile, containing task name input and sliders
+- **Keyboard_Overlay**: The visual artifact where the virtual keyboard covers UI elements, revealing the page content behind the bottom sheet
+- **Slider**: A touch-interactive control for adjusting numeric values (priority, desire, difficulty)
+- **Handle**: The draggable bar (brow) at the top of a bottom sheet used for dismissing the sheet
+- **Page_Scroll**: The vertical scrolling of the main page content
+- **Browser_Bottom_Panel**: The browser's native UI controls at the bottom of the mobile viewport
+- **Visual_Viewport**: The portion of the page currently visible to the user, which changes when the keyboard appears
 
 ## Requirements
 
-### Requirement 1: Keyboard Viewport Stability
+### Requirement 1: Keyboard Overlay Prevention
 
-**User Story:** As a mobile user, I want the UI to remain stable when the keyboard appears, so that I can edit task names without layout disruption or performance issues.
-
-#### Acceptance Criteria
-
-1. WHEN the virtual keyboard appears on mobile devices, THE Mobile_UI SHALL maintain its layout position without shifting elements upward
-2. WHEN the virtual keyboard is visible, THE Mobile_UI SHALL use the Visual Viewport API to adjust only the visible area without reflowing the entire layout
-3. WHEN a user types in an input field within a Bottom_Sheet, THE Mobile_UI SHALL prevent layout thrashing and maintain smooth performance
-4. WHEN the keyboard dismisses, THE Mobile_UI SHALL restore the original viewport dimensions smoothly without jarring transitions
-5. THE Bottom_Sheet SHALL use CSS viewport units (dvh or svh) to handle dynamic viewport changes caused by keyboard appearance
-
-### Requirement 2: Horizontal Scroll Prevention
-
-**User Story:** As a mobile user, I want horizontal scrolling to be disabled, so that swipe gestures on cards don't accidentally shift the page left or right.
+**User Story:** As a mobile user, I want the keyboard to temporarily cover UI elements without causing visual artifacts, so that I can edit task names without seeing the page content behind the bottom sheet.
 
 #### Acceptance Criteria
 
-1. WHEN a user performs a horizontal swipe gesture on mobile devices, THE Mobile_UI SHALL prevent any horizontal page scrolling
-2. THE Mobile_UI SHALL apply CSS overflow-x: hidden to the body and root elements on mobile devices
-3. WHEN a Task_Card is being swiped, THE Mobile_UI SHALL prevent horizontal scroll propagation to parent elements
-4. THE Mobile_UI SHALL maintain vertical scrolling functionality while horizontal scrolling is disabled
+1. WHEN the virtual keyboard appears in the Card_Settings_Sheet, THE System SHALL maintain the bottom sheet's visual integrity without revealing page content behind it
+2. WHEN the virtual keyboard covers UI elements in the Card_Settings_Sheet, THE System SHALL prevent sliders from rendering on top of the keyboard overlay
+3. WHEN the user types in the task name input field, THE System SHALL keep the bottom sheet's background opaque and continuous
+4. WHEN the keyboard dismisses, THE System SHALL restore the original bottom sheet layout without layout shifts
 
-### Requirement 3: Bottom Sheet Interaction Reliability
+### Requirement 2: Sufficient Scroll Range
 
-**User Story:** As a mobile user, I want bottom sheets to open and close reliably, so that I can easily dismiss menus and forms without frustration.
-
-#### Acceptance Criteria
-
-1. WHEN a user swipes down on the drag handle of a Bottom_Sheet, THE Bottom_Sheet SHALL close smoothly with a threshold of 100px or velocity of 300px/s
-2. WHEN a user taps the backdrop behind a Bottom_Sheet, THE Bottom_Sheet SHALL close with a smooth animation
-3. WHEN a user presses the Browser_Back_Button while a Bottom_Sheet is open, THE Bottom_Sheet SHALL close and prevent browser navigation
-4. WHEN a Bottom_Sheet closes, THE Mobile_UI SHALL animate the dismissal with a spring animation (damping: 30, stiffness: 300)
-5. THE Bottom_Sheet SHALL use Framer Motion's drag constraints to make the drag handle more responsive to touch input
-6. WHEN a Bottom_Sheet is being dragged, THE Mobile_UI SHALL provide immediate visual feedback without lag or stuttering
-
-### Requirement 4: Task Card Swipe Gesture Consistency
-
-**User Story:** As a mobile user, I want task card swipe gestures to work reliably, so that I can edit or delete tasks regardless of swipe speed or duration.
+**User Story:** As a mobile user, I want to scroll down far enough to access all controls, so that I can reach the Save button without it being covered by the browser's bottom panel.
 
 #### Acceptance Criteria
 
-1. WHEN a user swipes a Task_Card beyond 50% of the card width in either direction, THE Task_Card SHALL trigger the associated action (edit or delete) upon release
-2. WHEN a Task_Card swipe is released beyond the threshold, THE Mobile_UI SHALL execute the action regardless of swipe velocity or duration
-3. WHEN a user swipes a Task_Card vertically, THE Mobile_UI SHALL prioritize card swiping over page scrolling when horizontal movement exceeds 10px
-4. WHEN a Task_Card is being swiped horizontally, THE Mobile_UI SHALL prevent vertical scroll propagation
-5. THE Task_Card SHALL use directional drag locking to distinguish between horizontal swipes and vertical scrolls within the first 15px of movement
-6. WHEN a Task_Card swipe does not reach the threshold, THE Task_Card SHALL animate back to its original position with a spring animation
+1. WHEN the Card_Settings_Sheet is open, THE System SHALL provide sufficient scroll range to reveal all interactive elements
+2. WHEN the user scrolls to the bottom of the Card_Settings_Sheet, THE System SHALL ensure the Save button is fully visible above the Browser_Bottom_Panel
+3. WHEN the keyboard is visible, THE System SHALL adjust the scrollable area to accommodate both the keyboard and the Browser_Bottom_Panel
+4. WHEN the bottom sheet content exceeds the Visual_Viewport height, THE System SHALL enable smooth scrolling to all content
 
-### Requirement 5: Animation Performance Optimization
+### Requirement 3: Scroll Isolation During Slider Interaction
 
-**User Story:** As a mobile user, I want all animations to run smoothly at 60fps, so that the app feels responsive and polished without stuttering or lag.
+**User Story:** As a mobile user, I want to adjust sliders without triggering page scroll, so that I can precisely set values without the interface moving unexpectedly.
 
 #### Acceptance Criteria
 
-1. WHEN a Bottom_Sheet opens or closes, THE Mobile_UI SHALL animate using GPU-accelerated transform properties (translateY) instead of layout properties
-2. WHEN a Task_Card expands or collapses, THE Mobile_UI SHALL use Framer Motion's layout animations with optimized spring configurations
-3. THE Mobile_UI SHALL apply will-change CSS hints to animated elements only during active animations
-4. WHEN multiple animations occur simultaneously, THE Mobile_UI SHALL maintain 60fps performance on devices with at least 2GB RAM
-5. THE Mobile_UI SHALL use transform: translateZ(0) to promote animated elements to their own compositor layers
-6. WHEN animations complete, THE Mobile_UI SHALL remove will-change properties to conserve memory
+1. WHEN the user drags a Slider, THE System SHALL prevent Page_Scroll from occurring
+2. WHEN the user touches a Slider track, THE System SHALL isolate touch events to the slider component only
+3. WHEN the user completes a slider adjustment, THE System SHALL restore normal scroll behavior
+4. WHILE a Slider is being dragged, THE System SHALL maintain the page's scroll position
 
-### Requirement 6: Modal Scroll Lock
+### Requirement 4: Controlled Bottom Sheet Dismissal
 
-**User Story:** As a mobile user, I want background scrolling to be disabled when a menu is open, so that the interface feels stable and performs better.
+**User Story:** As a mobile user, I want bottom sheets to close only through intentional actions, so that I don't accidentally dismiss my work with light swipes.
 
 #### Acceptance Criteria
 
-1. WHEN a Bottom_Sheet opens, THE Mobile_UI SHALL prevent scrolling on the background page content
-2. WHEN a Bottom_Sheet is open, THE Mobile_UI SHALL apply CSS overflow: hidden to the document body
-3. WHEN a Bottom_Sheet closes, THE Mobile_UI SHALL restore the original scroll position and overflow settings
-4. THE Mobile_UI SHALL use touch-action: none on the backdrop element to prevent touch event propagation
-5. WHEN a user attempts to scroll within a Bottom_Sheet, THE Mobile_UI SHALL allow scrolling only within the Bottom_Sheet content area
-6. THE Mobile_UI SHALL prevent momentum scrolling from propagating to background elements on iOS devices
+1. WHEN the user drags the Handle downward, THE Bottom_Sheet SHALL close
+2. WHEN the user taps outside the Bottom_Sheet, THE Bottom_Sheet SHALL close
+3. WHEN the user presses the browser back button, THE Bottom_Sheet SHALL close
+4. WHEN the user swipes down anywhere in the Bottom_Sheet content area (not the Handle), THE Bottom_Sheet SHALL NOT close
+5. WHEN the user scrolls content within the Bottom_Sheet, THE System SHALL distinguish between scroll gestures and dismiss gestures
+6. WHEN the user performs a light swipe down in the Bottom_Sheet content area, THE Bottom_Sheet SHALL remain open
 
-### Requirement 7: Browser History Integration
+### Requirement 5: Desktop Preservation
 
-**User Story:** As a mobile user, I want to use the browser back button to close open menus, so that I can navigate naturally without getting trapped in modal states.
-
-#### Acceptance Criteria
-
-1. WHEN a Bottom_Sheet opens, THE Mobile_UI SHALL push a history state to the browser history stack
-2. WHEN a user presses the Browser_Back_Button with a Bottom_Sheet open, THE Mobile_UI SHALL close the Bottom_Sheet and prevent actual navigation
-3. WHEN multiple Bottom_Sheets are open sequentially, THE Mobile_UI SHALL close them in reverse order using the Browser_Back_Button
-4. WHEN a Bottom_Sheet closes programmatically, THE Mobile_UI SHALL remove the corresponding history state without triggering navigation
-5. THE Mobile_UI SHALL use the History API (pushState/popState) to manage modal state without changing the URL
-
-### Requirement 8: Touch Event Optimization
-
-**User Story:** As a mobile user, I want touch interactions to feel immediate and responsive, so that the app doesn't feel sluggish or unresponsive.
+**User Story:** As a desktop user, I want the desktop interface to remain unchanged, so that my workflow is not disrupted by mobile-specific fixes.
 
 #### Acceptance Criteria
 
-1. WHEN a user touches a Task_Card, THE Mobile_UI SHALL respond within 16ms (one frame at 60fps)
-2. THE Mobile_UI SHALL use passive event listeners for scroll and touch events where possible
-3. WHEN a user performs a swipe gesture, THE Mobile_UI SHALL use requestAnimationFrame for smooth visual updates
-4. THE Mobile_UI SHALL debounce rapid touch events to prevent performance degradation
-5. WHEN touch events are processed, THE Mobile_UI SHALL avoid forced synchronous layouts (layout thrashing)
-
-### Requirement 9: Disable Performance-Heavy Effects on Mobile
-
-**User Story:** As a mobile user, I want the app to run smoothly without unnecessary visual effects, so that performance is prioritized over decorative features.
-
-#### Acceptance Criteria
-
-1. WHEN the application runs on mobile devices, THE Mobile_UI SHALL disable gyroscope-based tilt effects on all components
-2. WHEN the application runs on mobile devices, THE Mobile_UI SHALL disable parallax scrolling effects on all components
-3. THE Mobile_UI SHALL remove the gyroscope tilt toggle from the settings menu on mobile devices
-4. WHEN the application runs on mobile devices, THE Mobile_UI SHALL apply simplified animations that prioritize performance over visual complexity
-5. THE Mobile_UI SHALL detect mobile devices using screen width (< 1024px) or user agent detection to apply these optimizations
+1. WHEN changes are applied to mobile components, THE System SHALL NOT modify desktop UI behavior
+2. WHEN the viewport width indicates a desktop device, THE System SHALL use the existing desktop components and interactions
+3. WHEN mobile-specific fixes are implemented, THE System SHALL scope them to mobile device detection or viewport conditions

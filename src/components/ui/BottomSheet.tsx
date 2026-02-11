@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useRef } from 'react';
+import { ReactNode, useEffect, useRef, useState } from 'react';
 import { motion, PanInfo, useAnimation } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
@@ -26,8 +26,21 @@ export const BottomSheet = ({
   const controls = useAnimation();
   const sheetRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
 
-  // Scroll lock with position preservation
+  // Detect mobile viewport (< 1024px) for mobile-specific behaviors
+  useEffect(() => {
+    const checkViewport = () => {
+      setIsMobileViewport(window.innerWidth < 1024);
+    };
+    
+    checkViewport();
+    window.addEventListener('resize', checkViewport);
+    
+    return () => window.removeEventListener('resize', checkViewport);
+  }, []);
+
+  // Scroll lock with position preservation (mobile-only for iOS Safari compatibility)
   useEffect(() => {
     if (isOpen) {
       // Store current focus
@@ -36,11 +49,17 @@ export const BottomSheet = ({
       // Store current scroll position
       const scrollY = window.scrollY;
       
-      // Lock body scroll (iOS Safari compatible)
-      document.body.style.overflow = 'hidden';
-      document.body.style.position = 'fixed';
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = '100%';
+      // Lock body scroll - apply mobile-specific fixes only on mobile viewports
+      if (isMobileViewport) {
+        // iOS Safari compatible scroll lock
+        document.body.style.overflow = 'hidden';
+        document.body.style.position = 'fixed';
+        document.body.style.top = `-${scrollY}px`;
+        document.body.style.width = '100%';
+      } else {
+        // Desktop: simple overflow hidden is sufficient
+        document.body.style.overflow = 'hidden';
+      }
       
       // Animate in
       controls.start({ y: 0, opacity: 1 });
@@ -56,10 +75,12 @@ export const BottomSheet = ({
       return () => {
         // Restore scroll
         document.body.style.overflow = '';
-        document.body.style.position = '';
-        document.body.style.top = '';
-        document.body.style.width = '';
-        window.scrollTo(0, scrollY);
+        if (isMobileViewport) {
+          document.body.style.position = '';
+          document.body.style.top = '';
+          document.body.style.width = '';
+          window.scrollTo(0, scrollY);
+        }
         
         // Restore focus
         if (previousFocusRef.current) {
@@ -67,11 +88,11 @@ export const BottomSheet = ({
         }
       };
     }
-  }, [isOpen, controls]);
+  }, [isOpen, controls, isMobileViewport]);
 
-  // Visual Viewport API integration for keyboard handling
+  // Visual Viewport API integration for keyboard handling (mobile-only)
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || !isMobileViewport) return;
 
     const handleVisualViewport = () => {
       if (sheetRef.current) {
@@ -104,7 +125,7 @@ export const BottomSheet = ({
         window.removeEventListener('resize', handleVisualViewport);
       };
     }
-  }, [isOpen]);
+  }, [isOpen, isMobileViewport]);
 
   // Browser history integration
   useEffect(() => {
@@ -173,11 +194,6 @@ export const BottomSheet = ({
         initial={{ y: '100%', opacity: 0 }}
         animate={controls}
         exit={{ y: '100%', opacity: 0 }}
-        drag="y"
-        dragConstraints={{ top: 0, bottom: 0 }}
-        dragElastic={{ top: 0, bottom: 0.2 }}
-        dragMomentum={false}
-        onDragEnd={handleDragEnd}
         transition={{ type: 'spring', damping: 35, stiffness: 350, mass: 0.5 }}
         className={cn(
           'fixed bottom-0 left-0 right-0 z-50 bg-background rounded-t-3xl shadow-2xl bottom-sheet',
@@ -191,7 +207,7 @@ export const BottomSheet = ({
           touchAction: 'pan-y'
         }}
       >
-        {/* Drag handle - increased hit area */}
+        {/* Drag handle - increased hit area, handle-only dragging */}
         <motion.div 
           className="flex justify-center pt-4 pb-3 cursor-grab active:cursor-grabbing" 
           style={{ minHeight: '48px' }}
@@ -199,6 +215,7 @@ export const BottomSheet = ({
           dragConstraints={{ top: 0, bottom: 0 }}
           dragElastic={{ top: 0, bottom: 0.2 }}
           dragMomentum={false}
+          dragPropagation={false}
           onDragEnd={handleDragEnd}
         >
           <div className="w-12 h-1.5 bg-muted-foreground/30 rounded-full pointer-events-none" />
@@ -206,7 +223,7 @@ export const BottomSheet = ({
 
         {/* Content */}
         <div 
-          className="overflow-y-auto overscroll-contain px-6 pb-8" 
+          className="overflow-y-auto overscroll-contain px-6 pb-8 bottom-sheet-content" 
           style={{ 
             maxHeight: fullScreen ? 'calc(100dvh - 48px)' : 'calc(90dvh - 48px)',
             overscrollBehavior: 'contain',
