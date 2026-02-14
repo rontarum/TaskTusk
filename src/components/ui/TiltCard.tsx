@@ -19,8 +19,9 @@ export const TiltCard = React.forwardRef<HTMLDivElement, TiltCardProps>(
         React.useImperativeHandle(ref, () => localRef.current!);
 
         React.useEffect(() => {
-            if (localRef.current) {
-                VanillaTilt.init(localRef.current, {
+            const element = localRef.current;
+            if (element) {
+                VanillaTilt.init(element, {
                     reverse: true, // Reversed tilt direction
                     max: 10, // Increased tilt angle for more movement
                     speed: 600, // Slower transition for "antimagnetic" smoothness
@@ -39,8 +40,8 @@ export const TiltCard = React.forwardRef<HTMLDivElement, TiltCardProps>(
             }
 
             return () => {
-                if (localRef.current && (localRef.current as TiltElement).vanillaTilt) {
-                    (localRef.current as TiltElement).vanillaTilt.destroy();
+                if (element && (element as TiltElement).vanillaTilt) {
+                    (element as TiltElement).vanillaTilt.destroy();
                 }
             };
         }, [options]);

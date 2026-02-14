@@ -59,7 +59,7 @@ export const MobileMenu = ({
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={{ left: 0, right: 0.5 }}
         onDragEnd={handleDragEnd}
-        transition={{ type: 'spring', damping: 40, stiffness: 400 }}
+        transition={{ type: 'spring', damping: 30, stiffness: 300 }}
         className={cn(
           'fixed top-0 right-0 bottom-0 z-50 w-[300px] bg-background shadow-2xl flex flex-col',
           className

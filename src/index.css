@@ -525,6 +525,7 @@ All colors MUST be HSL.
     overflow-x: hidden;
     overscroll-behavior-x: none;
     width: 100%;
+    max-width: 100vw;
     position: relative;
   }
 
@@ -539,8 +540,12 @@ All colors MUST be HSL.
     --vw: 1dvw;
   }
 
-  /* Disable double-tap zoom */
-  * {
+  /* Selective touch-action: only apply to non-interactive elements */
+  button,
+  a,
+  input,
+  select,
+  textarea {
     touch-action: manipulation;
   }
 
@@ -564,14 +569,16 @@ All colors MUST be HSL.
     overscroll-behavior: contain;
   }
 
-  /* GPU acceleration for animations */
-  .paper,
-  .bottom-sheet {
+  /* GPU acceleration for animated elements */
+  .paper {
     transform: translateZ(0);
-    backface-visibility: hidden;
   }
 
-  /* Mobile optimizations class */
+  .bottom-sheet {
+    transform: translateZ(0);
+  }
+
+  /* Mobile optimizations class - applied dynamically via useMobileOptimizations */
   .mobile-optimized {
     --parallax-enabled: 0;
   }
@@ -580,17 +587,8 @@ All colors MUST be HSL.
     transform: none !important;
   }
 
-  .mobile-optimized .paper,
-  .mobile-optimized .bottom-sheet {
-    transform: translateZ(0);
-    backface-visibility: hidden;
-  }
-}
-
-/* Mobile horizontal scroll prevention */
-@media (max-width: 1023px) {
-  html, body {
-    overflow-x: hidden;
-    max-width: 100vw;
+  /* Animated elements get will-change via CSS class */
+  .mobile-will-change-transform {
+    will-change: transform;
   }
 }

@@ -290,7 +290,7 @@ export const TaskCard = ({ item, minScore = 0, maxScore = 100, onTap, onEdit, on
         layout="position"
         drag="x"
         dragConstraints={{ left: -150, right: 150 }}
-        dragElastic={0.2}
+        dragElastic={0.1}
         dragDirectionLock={true}
         dragPropagation={false}
         onDragStart={handleDragStart}
@@ -305,8 +305,8 @@ export const TaskCard = ({ item, minScore = 0, maxScore = 100, onTap, onEdit, on
         onMouseMove={handleLongPressMove}
         className={cn('paper p-4 cursor-pointer relative z-10 swipeable', className)}
         onClick={handleTap}
-        whileTap={{ scale: 0.98 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+        whileTap={swipeState.isDragging ? undefined : { scale: 0.98 }}
+        transition={{ type: 'spring', stiffness: 260, damping: 32 }}
         style={{ userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
       >
       {/* Header: Emoji + Name + Score */}

@@ -1,6 +1,7 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { useMobileViewport } from '@/hooks/use-mobile-viewport';
 
 interface TouchSliderProps {
   min: number;
@@ -23,27 +24,15 @@ export const TouchSlider = ({
 }: TouchSliderProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const [displayValue, setDisplayValue] = useState(value);
-  const [isMobileViewport, setIsMobileViewport] = useState(false);
+  const isMobileViewport = useMobileViewport();
   const trackRef = useRef<HTMLDivElement>(null);
   const lastVibrateRef = useRef<number>(value);
-
-  // Detect mobile viewport (< 1024px) for mobile-specific touch behaviors
-  useEffect(() => {
-    const checkViewport = () => {
-      setIsMobileViewport(window.innerWidth < 1024);
-    };
-    
-    checkViewport();
-    window.addEventListener('resize', checkViewport);
-    
-    return () => window.removeEventListener('resize', checkViewport);
-  }, []);
 
   useEffect(() => {
     setDisplayValue(value);
   }, [value]);
 
-  const calculateValue = (clientX: number): number => {
+  const calculateValue = useCallback((clientX: number): number => {
     if (!trackRef.current) return value;
 
     const rect = trackRef.current.getBoundingClientRect();
@@ -53,11 +42,29 @@ export const TouchSlider = ({
     const percentage = Math.max(0, Math.min(1, offsetX / effectiveWidth));
     const rawValue = min + percentage * (max - min);
     const steppedValue = Math.round(rawValue / step) * step;
-    
-    return Math.max(min, Math.min(max, steppedValue));
-  };
 
-  const handleMove = (clientX: number) => {
+    return Math.max(min, Math.min(max, steppedValue));
+  }, [trackRef, value, min, max, step]);
+
+  // Use refs for values needed in event handlers to avoid stale closures
+  const isDraggingRef = useRef(isDragging);
+  const displayValueRef = useRef(displayValue);
+  const isMobileViewportRef = useRef(isMobileViewport);
+
+  // Keep refs in sync
+  useEffect(() => {
+    isDraggingRef.current = isDragging;
+  }, [isDragging]);
+
+  useEffect(() => {
+    displayValueRef.current = displayValue;
+  }, [displayValue]);
+
+  useEffect(() => {
+    isMobileViewportRef.current = isMobileViewport;
+  }, [isMobileViewport]);
+
+  const handleMove = useCallback((clientX: number) => {
     const newValue = calculateValue(clientX);
     setDisplayValue(newValue);
 
@@ -66,64 +73,64 @@ export const TouchSlider = ({
       navigator.vibrate(10);
       lastVibrateRef.current = newValue;
     }
-  };
+  }, [calculateValue]);
 
-  const handleStart = (clientX: number) => {
+  const handleEnd = useCallback(() => {
+    setIsDragging(false);
+    onChange(displayValueRef.current);
+  }, [onChange]);
+
+  const handleStart = useCallback((clientX: number) => {
     setIsDragging(true);
     handleMove(clientX);
-  };
+  }, [handleMove]);
 
-  const handleEnd = () => {
-    setIsDragging(false);
-    onChange(displayValue);
-  };
-
-  const handleMouseDown = (e: React.MouseEvent) => {
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
     handleStart(e.clientX);
-  };
+  }, [handleStart]);
 
-  const handleMouseMove = (e: MouseEvent) => {
-    if (isDragging) {
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (isDraggingRef.current) {
       handleMove(e.clientX);
     }
-  };
+  }, [handleMove]);
 
-  const handleMouseUp = () => {
-    if (isDragging) {
+  const handleMouseUp = useCallback(() => {
+    if (isDraggingRef.current) {
       handleEnd();
     }
-  };
+  }, [handleEnd]);
 
-  const handleTouchStart = (e: React.TouchEvent) => {
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
     // Only apply mobile-specific event isolation on mobile viewports
-    if (isMobileViewport) {
+    if (isMobileViewportRef.current) {
       e.stopPropagation(); // Prevent event bubbling to parent containers
     }
     handleStart(e.touches[0].clientX);
-  };
+  }, [handleStart]);
 
-  const handleTouchMove = (e: TouchEvent) => {
+  const handleTouchMove = useCallback((e: TouchEvent) => {
     // Only prevent default scroll on mobile viewports
-    if (isMobileViewport) {
+    if (isMobileViewportRef.current) {
       e.preventDefault(); // Prevent default scroll behavior
     }
-    if (isDragging && e.touches.length > 0) {
+    if (isDraggingRef.current && e.touches.length > 0) {
       handleMove(e.touches[0].clientX);
     }
-  };
+  }, [handleMove]);
 
-  const handleTouchEnd = () => {
-    if (isDragging) {
+  const handleTouchEnd = useCallback(() => {
+    if (isDraggingRef.current) {
       handleEnd();
     }
-  };
+  }, [handleEnd]);
 
   useEffect(() => {
     if (isDragging) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
       // Only use passive: false on mobile viewports where we need preventDefault
-      document.addEventListener('touchmove', handleTouchMove, { passive: !isMobileViewport });
+      document.addEventListener('touchmove', handleTouchMove, { passive: !isMobileViewportRef.current });
       document.addEventListener('touchend', handleTouchEnd);
 
       return () => {
@@ -133,7 +140,7 @@ export const TouchSlider = ({
         document.removeEventListener('touchend', handleTouchEnd);
       };
     }
-  }, [isDragging, displayValue, isMobileViewport]);
+  }, [isDragging, handleMouseMove, handleMouseUp, handleTouchMove, handleTouchEnd]);
 
   const percentage = ((displayValue - min) / (max - min)) * 100;
 

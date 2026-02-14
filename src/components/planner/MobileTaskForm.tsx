@@ -5,6 +5,7 @@ import { TouchSlider } from '@/components/ui/TouchSlider';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { MobileEmojiPicker } from '@/components/planner/MobileEmojiPicker';
 import { PlannerItem } from '@/components/planner/types';
+import { useMobileViewport, useKeyboardHeight } from '@/hooks/use-mobile-viewport';
 
 interface MobileTaskFormProps {
   isOpen: boolean;
@@ -31,55 +32,11 @@ export const MobileTaskForm = ({
   const [percent, setPercent] = useState(initialData?.percent || 0);
   const [error, setError] = useState('');
   const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
-  const [isMobileViewport, setIsMobileViewport] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Detect mobile viewport (< 1024px) for mobile-specific behaviors
-  useEffect(() => {
-    const checkViewport = () => {
-      setIsMobileViewport(window.innerWidth < 1024);
-    };
-    
-    checkViewport();
-    window.addEventListener('resize', checkViewport);
-    
-    return () => window.removeEventListener('resize', checkViewport);
-  }, []);
-
-  // Visual Viewport integration for keyboard handling (mobile-only)
-  useEffect(() => {
-    if (!isOpen || !isMobileViewport) return;
-
-    const visualViewport = window.visualViewport;
-    if (!visualViewport) return;
-
-    const handleResize = () => {
-      // Calculate keyboard height by comparing window height to visual viewport height
-      const windowHeight = window.innerHeight;
-      const viewportHeight = visualViewport.height;
-      const keyboardVisible = windowHeight > viewportHeight;
-      
-      if (keyboardVisible) {
-        const calculatedKeyboardHeight = windowHeight - viewportHeight;
-        setKeyboardHeight(calculatedKeyboardHeight);
-      } else {
-        setKeyboardHeight(0);
-      }
-    };
-
-    visualViewport.addEventListener('resize', handleResize);
-    visualViewport.addEventListener('scroll', handleResize);
-
-    // Initial check
-    handleResize();
-
-    return () => {
-      visualViewport.removeEventListener('resize', handleResize);
-      visualViewport.removeEventListener('scroll', handleResize);
-    };
-  }, [isOpen, isMobileViewport]);
+  const isMobileViewport = useMobileViewport();
+  const keyboardHeight = useKeyboardHeight(isOpen);
 
   useEffect(() => {
     if (initialData) {
@@ -94,7 +51,7 @@ export const MobileTaskForm = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!text.trim()) {
       setError('Введите название таска');
       return;
@@ -129,13 +86,13 @@ export const MobileTaskForm = ({
 
   return (
     <BottomSheet isOpen={isOpen} onClose={onClose} fullScreen>
-      <div 
+      <div
         ref={containerRef}
-        className="p-6" 
-        style={{ 
+        className="p-6"
+        style={{
           height: '100dvh',
-          paddingBottom: isMobileViewport 
-            ? `max(env(safe-area-inset-bottom), ${80 + keyboardHeight}px)` 
+          paddingBottom: isMobileViewport
+            ? `max(env(safe-area-inset-bottom), ${80 + keyboardHeight}px)`
             : 'env(safe-area-inset-bottom, 80px)',
           overflow: 'auto',
           overscrollBehavior: isMobileViewport ? 'contain' : 'auto'
@@ -216,19 +173,19 @@ export const MobileTaskForm = ({
                 // Color logic: 0,25 = destructive, 50 = gold, 75,100 = primary
                 let colorClass = '';
                 if (option === 0 || option === 25) {
-                  colorClass = isSelected 
-                    ? 'bg-destructive text-destructive-foreground' 
+                  colorClass = isSelected
+                    ? 'bg-destructive text-destructive-foreground'
                     : 'bg-destructive/10 text-destructive hover:bg-destructive/20';
                 } else if (option === 50) {
-                  colorClass = isSelected 
-                    ? 'bg-[#FFC445] text-black' 
+                  colorClass = isSelected
+                    ? 'bg-[#FFC445] text-black'
                     : 'bg-[#FFC445]/10 text-[#FFC445] hover:bg-[#FFC445]/20';
                 } else {
-                  colorClass = isSelected 
-                    ? 'bg-primary text-primary-foreground' 
+                  colorClass = isSelected
+                    ? 'bg-primary text-primary-foreground'
                     : 'bg-primary/10 text-primary hover:bg-primary/20';
                 }
-                
+
                 return (
                   <button
                     key={option}

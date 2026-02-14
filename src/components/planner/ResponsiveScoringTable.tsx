@@ -37,7 +37,7 @@ export const ResponsiveScoringTable = ({
   // Mobile: TaskCard grid
   if (isMobile) {
     const orderedItems = order.map((id) => items.find((item) => item.id === id)).filter(Boolean) as PlannerItem[];
-    
+
     // Calculate min and max scores for color interpolation (only from actual items)
     const scores = orderedItems.map(scoreOf);
     const minScore = scores.length > 0 ? Math.min(...scores) : 0;
@@ -45,9 +45,9 @@ export const ResponsiveScoringTable = ({
 
     return (
       <motion.div
-        layout
+        layout="position"
         className="grid gap-4"
-        transition={{ duration: 0.3 }}
+        transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
       >
         {orderedItems.map((item) => (
           <TaskCard
