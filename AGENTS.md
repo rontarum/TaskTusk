@@ -226,3 +226,4 @@ Mesh gradients for animated background are defined in `theme.config.ts` under `m
 3. **Keep table editing state in sync** to prevent row reordering during input
 4. **Use `@/` imports** for cross-directory imports (not relative paths like `../../`)
 5. **All user-facing text must be in Russian** — check strings in JSX
+6. **If task is not simple and clean - do requirements first, then work.

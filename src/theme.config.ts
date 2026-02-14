@@ -155,20 +155,20 @@ export const theme = {
         light: {
             backgroundStart: "#EDEDED",
             backgroundEnd: "#F5F5F5",
-            first: "#93f1e5ff",
+            first: "#93f1e5ff", /* Это первый цвет градиента, основа */
             second: "#E3F0F7",
             third: "#E6F4F4",
-            fourth: "#ffa6c9ff",
+            fourth: "#ffa6c9ff", /* Это второй цвет градиента, основа */
             fifth: "#E5EAF2",
             pointer: "#EDEDED",
         },
         dark: {
             backgroundStart: "#1E1E1E",
             backgroundEnd: "#1E1E1E",
-            first: "#1daf9cff",
+            first: "#1daf9cff", /* Это первый цвет градиента, основа */
             second: "#18413bff",
             third: "#57283bff",
-            fourth: "#962150ff",
+            fourth: "#962150ff", /* Это второй цвет градиента, основа */
             fifth: "#18181B",
             pointer: "#1E1E1E",
         },

@@ -344,8 +344,8 @@ const Index = () => {
             {/* Sort Button */}
             <motion.button
               className={cn(
-                "fixed bottom-4 right-20 z-30 w-14 h-14 rounded-xl shadow-lg flex items-center justify-center transition-colors",
-                sorted ? "bg-primary text-primary-foreground" : "bg-background/80 backdrop-blur-sm text-foreground border border-border"
+                "fixed bottom-4 right-20 z-30 w-14 h-14 rounded-2xl shadow-lg flex items-center justify-center transition-colors",
+                sorted ? "bg-primary/20 text-primary border border-primary" : "bg-background/80 backdrop-blur-sm text-foreground border border-border"
               )}
               onClick={() => setSorted((s) => !s)}
               disabled={items.length < 2}
@@ -362,7 +362,7 @@ const Index = () => {
 
             {/* FAB */}
             <motion.button
-              className="fixed bottom-4 right-4 z-30 w-14 h-14 bg-primary text-primary-foreground rounded-xl shadow-lg flex items-center justify-center"
+              className="fixed bottom-4 right-4 z-30 w-14 h-14 bg-primary text-primary-foreground rounded-2xl shadow-lg flex items-center justify-center"
               onClick={() => {
                 setMobileFormMode('add');
                 setEditingItem(undefined);

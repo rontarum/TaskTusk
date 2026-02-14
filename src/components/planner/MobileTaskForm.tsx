@@ -24,7 +24,7 @@ export const MobileTaskForm = ({
   initialData,
 }: MobileTaskFormProps) => {
   const [text, setText] = useState(initialData?.text || '');
-  const [emoji, setEmoji] = useState(initialData?.emoji || '🎯');
+  const [emoji, setEmoji] = useState(initialData?.emoji || '❤️');
   const [priority, setPriority] = useState(initialData?.priority || 5);
   const [desire, setDesire] = useState(initialData?.desire || 5);
   const [difficulty, setDifficulty] = useState(initialData?.difficulty || 5);
@@ -144,7 +144,7 @@ export const MobileTaskForm = ({
 
     // Reset form
     setText('');
-    setEmoji('🎯');
+    setEmoji('❤️');
     setPriority(5);
     setDesire(5);
     setDifficulty(5);
@@ -270,7 +270,7 @@ export const MobileTaskForm = ({
                     onClick={() => setPercent(option)}
                     className={`flex-1 py-3 rounded-2xl font-numbers font-semibold transition-colors ${colorClass}`}
                   >
-                    {option}%
+                    {option}
                   </button>
                 );
               })}
@@ -280,7 +280,7 @@ export const MobileTaskForm = ({
           {/* Submit button */}
           <Button
             type="submit"
-            className="w-full h-12 text-base font-semibold"
+            className="w-full h-12 rounded-2xl text-base font-semibold"
           >
             Сохранить
           </Button>
