@@ -60,7 +60,7 @@ export const ResponsiveHeader = ({
         <div className="flex shrink-0 items-center gap-2">
           <DonateButton />
           <ThemeToggle />
-          
+
           {/* Hamburger menu (mobile only) */}
           {isMobile && onMenuToggle && (
             <button

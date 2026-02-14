@@ -1,0 +1,44 @@
+
+---
+
+### Issue 3: Fonts Not Loading on iOS Devices
+**Problem:** Custom fonts (Gropled, Montserrat, Neutral Face) fall back to system fonts on iOS.
+**Root Cause:** Fonts are referenced in CSS variables but never loaded:
+- No `@font-face` declarations
+- No Google Fonts imports for these fonts
+- Fonts may work on desktop if installed locally
+
+**Solution:**
+- For Montserrat: Add Google Fonts import (available on Google Fonts)
+- For Gropled: Either find a suitable alternative or host font files locally with @font-face
+- For Neutral Face: Find alternative or local font file
+
+---
+
+### Issue 4: Button Hover State Stuck on Mobile (Card Form)
+**Problem:** When opening the card creation/editing menu (bottom sheet/dialog), the "save" button enters a hover state. After animation, it breaks the shadow and a semi-transparent rectangular mask appears around the button. This shouldn't happen on mobile - there's no hover on touch devices.
+**Root Cause:**
+- Mobile browsers often simulate `:hover` on touch
+- The button's hover styles persist after dialog/drawer animation completes
+- The shadow breaks due to the stuck hover state creating visual artifacts
+
+**Affected Components:**
+- `PlannerItemForm` (mobile version in `MobileTaskForm.tsx`)
+- `MobileTaskForm` save button
+- Any save/submit buttons in mobile dialogs/drawers
+
+**Solution:**
+- Disable hover effects on touch devices using `@media (hover: none)`
+- Add touch event handlers to explicitly clear hover states
+- Use `transform: translateY()` instead of `top` for pressed offset (consistent with Issue 1)
+
+---
+
+## Tasks
+
+### Task 3: Fix iOS Font Loading
+- [ ] Add Google Fonts import for Montserrat
+- [ ] Find and add Gropled (or create folder and ask for local font file)
+- [ ] Find and add Neutral Face (or create folder and ask for local font file)
+- [ ] Test on iOS device
+

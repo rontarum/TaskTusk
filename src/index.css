@@ -1,6 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Poppins&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Merriweather&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Geist+Mono&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -397,6 +398,18 @@ All colors MUST be HSL.
     top: 4px;
   }
 
+  /* Disable hover effects on touch devices - no hover on mobile */
+  @media (hover: none) and (pointer: coarse) {
+    .hover-elevate:hover {
+      top: 0;
+      box-shadow: inherit;
+    }
+
+    .hover-elevate:hover::after {
+      display: none;
+    }
+  }
+
   /* Rubber press effect (stretchy) */
   @keyframes rubber-press {
     0% {
@@ -491,59 +504,59 @@ All colors MUST be HSL.
     width: 100%;
     position: relative;
   }
-  
+
   /* Prevent pull-to-refresh on mobile */
   body {
     overscroll-behavior-y: contain;
   }
-  
+
   /* Use dynamic viewport units for mobile */
   :root {
     --vh: 1dvh;
     --vw: 1dvw;
   }
-  
+
   /* Disable double-tap zoom */
   * {
     touch-action: manipulation;
   }
-  
+
   /* Allow specific elements to have custom touch behavior */
   .swipeable {
     touch-action: pan-y;
   }
-  
+
   .draggable-handle {
     touch-action: none;
   }
-  
+
   /* Touch slider isolation - prevents page scroll during slider interaction */
   .touch-slider-track {
     touch-action: none;
   }
-  
+
   /* Bottom sheet content - allows vertical scroll but prevents overscroll chaining */
   .bottom-sheet-content {
     touch-action: pan-y;
     overscroll-behavior: contain;
   }
-  
+
   /* GPU acceleration for animations */
   .paper,
   .bottom-sheet {
     transform: translateZ(0);
     backface-visibility: hidden;
   }
-  
+
   /* Mobile optimizations class */
   .mobile-optimized {
     --parallax-enabled: 0;
   }
-  
+
   .mobile-optimized .parallax-layer {
     transform: none !important;
   }
-  
+
   .mobile-optimized .paper,
   .mobile-optimized .bottom-sheet {
     transform: translateZ(0);

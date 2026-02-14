@@ -38,7 +38,7 @@ const Index = () => {
   const [mobileFormMode, setMobileFormMode] = React.useState<'add' | 'edit'>('add');
   const [editingItem, setEditingItem] = React.useState<PlannerItem | undefined>();
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
-  
+
   const deviceInfo = useDevice();
   const { settings } = useMobileSettings();
   useMobileOptimizations(); // Apply mobile optimizations
@@ -48,7 +48,7 @@ const Index = () => {
   // Determine background animation complexity
   const bgComplexity = React.useMemo(() => {
     if (deviceInfo.capabilities.reducedMotion) return 'minimal';
-    if (isMobile) return settings.enhancedEffects ? 'reduced' : 'minimal';
+    if (isMobile) return settings.enhancedEffects ? 'full' : 'minimal';
     if (deviceInfo.type === 'tablet') return 'reduced';
     return 'full';
   }, [deviceInfo.type, deviceInfo.capabilities.reducedMotion, isMobile, settings.enhancedEffects]);
@@ -101,7 +101,7 @@ const Index = () => {
   function duplicateItem(id: string) {
     const item = items.find((it) => it.id === id);
     if (!item) return;
-    
+
     const duplicate: PlannerItem = {
       ...item,
       id: uid(),
@@ -113,7 +113,7 @@ const Index = () => {
   function handleCardEdit(id: string) {
     const item = items.find((it) => it.id === id);
     if (!item) return;
-    
+
     setEditingItem(item);
     setMobileFormMode('edit');
     setIsMobileFormOpen(true);
@@ -191,7 +191,7 @@ const Index = () => {
   }
 
   return (
-    <BackgroundGradientAnimation 
+    <BackgroundGradientAnimation
       containerClassName="min-h-screen app-bg bg-transparent"
       complexity={bgComplexity}
     >
