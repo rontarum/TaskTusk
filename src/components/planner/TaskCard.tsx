@@ -313,7 +313,7 @@ export const TaskCard = ({ item, minScore = 0, maxScore = 100, onTap, onEdit, on
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <span className="text-2xl flex-shrink-0">{item.emoji}</span>
-          <h3 className="font-heading font-semibold text-lg line-clamp-2 break-words">
+          <h3 className="font-heading font-bold text-xl line-clamp-2 break-words">
             {item.text}
           </h3>
         </div>
