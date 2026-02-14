@@ -63,14 +63,6 @@ export const BottomSheet = ({
       
       // Animate in
       controls.start({ y: 0, opacity: 1 });
-
-      // Focus trap
-      const focusableElements = sheetRef.current?.querySelectorAll(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-      );
-      if (focusableElements && focusableElements.length > 0) {
-        (focusableElements[0] as HTMLElement).focus();
-      }
       
       return () => {
         // Restore scroll

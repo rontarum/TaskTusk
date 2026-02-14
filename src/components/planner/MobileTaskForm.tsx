@@ -48,12 +48,6 @@ export const MobileTaskForm = ({
     return () => window.removeEventListener('resize', checkViewport);
   }, []);
 
-  useEffect(() => {
-    if (isOpen && inputRef.current) {
-      setTimeout(() => inputRef.current?.focus(), 100);
-    }
-  }, [isOpen]);
-
   // Visual Viewport integration for keyboard handling (mobile-only)
   useEffect(() => {
     if (!isOpen || !isMobileViewport) return;
@@ -97,33 +91,6 @@ export const MobileTaskForm = ({
       setPercent(initialData.percent);
     }
   }, [initialData]);
-
-  const handleInputFocus = () => {
-    // Scroll input into view when keyboard appears (mobile-only)
-    if (!isMobileViewport) return;
-    
-    if (inputRef.current && containerRef.current) {
-      // Use a slight delay to ensure keyboard is visible and viewport has resized
-      setTimeout(() => {
-        inputRef.current?.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'start',
-          inline: 'nearest'
-        });
-        
-        // Ensure the Save button remains accessible by scrolling container
-        // This helps when keyboard covers the bottom portion
-        const container = containerRef.current;
-        if (container) {
-          const scrollPadding = 100; // Extra space to ensure Save button visibility
-          container.scrollTop = Math.min(
-            container.scrollTop,
-            container.scrollHeight - container.clientHeight - scrollPadding
-          );
-        }
-      }, 300);
-    }
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -189,7 +156,6 @@ export const MobileTaskForm = ({
                 setText(e.target.value);
                 setError('');
               }}
-              onFocus={handleInputFocus}
               onKeyDown={handleKeyDown}
               placeholder="Назови таск"
               className="text-base"
