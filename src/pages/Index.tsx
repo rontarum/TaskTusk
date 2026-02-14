@@ -37,6 +37,9 @@ const Index = () => {
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
   const [mobileFormMode, setMobileFormMode] = React.useState<'add' | 'edit'>('add');
   const [editingItem, setEditingItem] = React.useState<PlannerItem | undefined>();
+  const [sortDelayPending, setSortDelayPending] = React.useState(false);
+  const sortDelayTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const frozenOrderRef = React.useRef<string[] | null>(null); // Store order before changes
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
 
   const deviceInfo = useDevice();
@@ -58,14 +61,56 @@ const Index = () => {
     setActiveId(items[0]?.id ?? null);
   }, [activeId, items]);
 
+  // Delay sorting by 1 second after item updates (only on desktop)
+  React.useEffect(() => {
+    // Only apply on desktop (not mobile) and when sorted is enabled
+    if (!sorted || isMobile) {
+      if (sortDelayTimerRef.current) {
+        clearTimeout(sortDelayTimerRef.current);
+        sortDelayTimerRef.current = null;
+      }
+      frozenOrderRef.current = null;
+      setSortDelayPending(false);
+      return;
+    }
+  }, [sorted, isMobile]);
+
+  // Freeze current order when items are about to change (on desktop with sorted enabled)
+  const freezeOrderForDelay = React.useCallback(() => {
+    if (!sorted || isMobile) return;
+
+    // Capture current order before the change
+    if (!frozenOrderRef.current) {
+      frozenOrderRef.current = [...items]
+        .sort((a, b) => scoreOf(b) - scoreOf(a))
+        .map((i) => i.id);
+      setSortDelayPending(true);
+    }
+
+    // Reset timer if already active
+    if (sortDelayTimerRef.current) {
+      clearTimeout(sortDelayTimerRef.current);
+    }
+
+    sortDelayTimerRef.current = setTimeout(() => {
+      frozenOrderRef.current = null;
+      sortDelayTimerRef.current = null;
+      setSortDelayPending(false);
+    }, 1000);
+  }, [sorted, isMobile, items]);
+
   const order = React.useMemo(() => {
     if (!sorted) return items.map((i) => i.id);
-    // When editing a value in the table, freeze row order to prevent rows from "jumping".
-    if (tableEditing) return items.map((i) => i.id);
+
+    // When sort delay is pending, return frozen order from before the change
+    if (sortDelayPending && frozenOrderRef.current) {
+      return frozenOrderRef.current;
+    }
+
     return [...items]
       .sort((a, b) => scoreOf(b) - scoreOf(a))
       .map((i) => i.id);
-  }, [items, sorted, tableEditing]);
+  }, [items, sorted, sortDelayPending]);
 
   function addItem(data: { text: string; emoji: string }) {
     const next: PlannerItem = {
@@ -91,6 +136,7 @@ const Index = () => {
   }
 
   function updateItem(id: string, patch: Partial<PlannerItem>) {
+    freezeOrderForDelay();
     setItems((prev) => prev.map((it) => (it.id === id ? { ...it, ...patch } : it)));
   }
 
@@ -330,13 +376,6 @@ const Index = () => {
             </section>
           </div>
         </main>
-
-        {/* Footer */}
-        <footer className="mt-auto mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-          <p className="text-[10px] text-foreground/50 text-left font-body">
-            *Вычисление очков происходит по формуле: (ВАЖНО + надбавки за незавершенность и сложность) × 0.93 + (ХОЧУ + бонусы за прогресс и легкость) × 0.69 + Бонус за легкость × 0.36
-          </p>
-        </footer>
 
         {/* Mobile FAB and Sort Button */}
         {isMobile && (

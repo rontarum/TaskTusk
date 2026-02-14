@@ -36,7 +36,7 @@ export const MobileMenu = ({
   const menuItems = [
     { icon: Upload, label: 'Открой', onClick: onImport },
     { icon: Download, label: 'Сохрани', onClick: onExport },
-    { icon: Trash2, label: 'Очисти', onClick: onClear },
+    { icon: Trash2, label: 'Очисти', onClick: onClear, destructive: true },
   ];
 
   return (
@@ -59,7 +59,7 @@ export const MobileMenu = ({
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={{ left: 0, right: 0.5 }}
         onDragEnd={handleDragEnd}
-        transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+        transition={{ type: 'spring', damping: 32, stiffness: 300, restSpeed: 0.5 }}
         className={cn(
           'fixed top-0 right-0 bottom-0 z-50 w-[300px] bg-background shadow-2xl flex flex-col',
           className
@@ -88,10 +88,13 @@ export const MobileMenu = ({
                   item.onClick();
                   onClose();
                 }}
-                className="w-full flex items-center gap-3 p-3 hover:bg-muted rounded-lg transition-colors text-left"
+                className={cn(
+                  "w-full flex items-center gap-3 p-3 hover:bg-muted rounded-lg transition-colors text-left",
+                  item.destructive && "text-destructive hover:bg-destructive/10"
+                )}
               >
-                <Icon className="w-5 h-5 text-muted-foreground" />
-                <span className="font-medium">{item.label}</span>
+                <Icon className={cn("w-5 h-5", item.destructive ? "text-destructive" : "text-muted-foreground")} />
+                <span className={cn("font-medium", item.destructive && "font-semibold")}>{item.label}</span>
               </button>
             );
           })}
