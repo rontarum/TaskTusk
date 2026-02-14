@@ -2,6 +2,29 @@
 @import url("https://fonts.googleapis.com/css2?family=Merriweather&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Geist+Mono&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap");
+
+/* Local font declarations */
+@font-face {
+  font-family: 'Gropled';
+  src: url('@/assets/fonts/gropled.otf') format('opentype');
+  font-weight: 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Neutral Face';
+  src: url('@/assets/fonts/neutral-face.otf') format('opentype');
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Neutral Face';
+  src: url('@/assets/fonts/neutral-face-bold.otf') format('opentype');
+  font-weight: 700;
+  font-display: swap;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

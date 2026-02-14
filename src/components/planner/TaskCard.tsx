@@ -48,7 +48,7 @@ export const TaskCard = ({ item, minScore = 0, maxScore = 100, onTap, onEdit, on
   // Reset card position when item data changes (after edit closes)
   useEffect(() => {
     // Check if item actually changed (not just re-render)
-    if (prevItemRef.current.text !== item.text || 
+    if (prevItemRef.current.text !== item.text ||
         prevItemRef.current.emoji !== item.emoji ||
         prevItemRef.current.priority !== item.priority ||
         prevItemRef.current.desire !== item.desire ||
@@ -81,7 +81,7 @@ export const TaskCard = ({ item, minScore = 0, maxScore = 100, onTap, onEdit, on
   const handleLongPressStart = (e: React.TouchEvent | React.MouseEvent) => {
     const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
     const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-    
+
     touchStartRef.current = { x: clientX, y: clientY };
 
     longPressTimerRef.current = setTimeout(() => {
@@ -89,7 +89,7 @@ export const TaskCard = ({ item, minScore = 0, maxScore = 100, onTap, onEdit, on
       if ('vibrate' in navigator) {
         navigator.vibrate(50);
       }
-      
+
       setContextMenuPosition({ x: clientX, y: clientY });
       setShowContextMenu(true);
     }, 500);
@@ -138,12 +138,12 @@ export const TaskCard = ({ item, minScore = 0, maxScore = 100, onTap, onEdit, on
   const handleDrag = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const deltaX = Math.abs(info.point.x - swipeState.startX);
     const deltaY = Math.abs(info.point.y - swipeState.startY);
-    
+
     // Directional locking after 15px movement
     if (!swipeState.direction && (deltaX > 15 || deltaY > 15)) {
       const direction = deltaX > deltaY ? 'horizontal' : 'vertical';
       setSwipeState(prev => ({ ...prev, direction }));
-      
+
       // If vertical, cancel drag and allow scroll
       if (direction === 'vertical') {
         controls.start({ x: 0 });
@@ -151,11 +151,11 @@ export const TaskCard = ({ item, minScore = 0, maxScore = 100, onTap, onEdit, on
         return;
       }
     }
-    
+
     // Only process horizontal swipes
     if (swipeState.direction === 'horizontal') {
       const offset = info.offset.x;
-      
+
       // Show action hint at 30px
       if (offset < -30) {
         setSwipeAction('delete');
@@ -171,14 +171,14 @@ export const TaskCard = ({ item, minScore = 0, maxScore = 100, onTap, onEdit, on
     const offset = info.offset.x;
     const cardWidth = cardRef.current?.getBoundingClientRect().width || 300;
     const threshold = cardWidth * 0.5; // 50% of card width
-    
+
     // Trigger action if past threshold (regardless of velocity)
     if (Math.abs(offset) > threshold && swipeState.direction === 'horizontal') {
       if (offset < 0 && onDelete) {
         // Delete: fade indicator quickly, then animate card off
         setSwipeAction(null);
-        controls.start({ 
-          x: -cardWidth, 
+        controls.start({
+          x: -cardWidth,
           opacity: 0,
           transition: { duration: 0.2, ease: 'easeOut' }
         }).then(() => {
@@ -192,7 +192,7 @@ export const TaskCard = ({ item, minScore = 0, maxScore = 100, onTap, onEdit, on
         return;
       }
     }
-    
+
     // Snap back if not triggered
     controls.start({ x: 0 });
     setSwipeAction(null);
@@ -333,15 +333,15 @@ export const TaskCard = ({ item, minScore = 0, maxScore = 100, onTap, onEdit, on
       {!isExpanded && (
         <div className="flex items-center gap-4 text-sm text-muted-foreground font-semibold">
           <div className="flex items-center gap-1">
-            <Star className="w-4 h-4" strokeWidth={2.5} />
+            <Star className="w-4 h-4" strokeWidth={3.6} />
             <span className="font-numbers font-bold">{item.priority}</span>
           </div>
           <div className="flex items-center gap-1">
-            <Heart className="w-4 h-4" strokeWidth={2.5} />
+            <Heart className="w-4 h-4" strokeWidth={4.0} />
             <span className="font-numbers font-bold">{item.desire}</span>
           </div>
           <div className="flex items-center gap-1">
-            <Zap className="w-4 h-4" strokeWidth={2.5} />
+            <Zap className="w-4 h-4" strokeWidth={3.0} />
             <span className="font-numbers font-bold">{item.difficulty}</span>
           </div>
         </div>
@@ -352,7 +352,7 @@ export const TaskCard = ({ item, minScore = 0, maxScore = 100, onTap, onEdit, on
         {isExpanded && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
-            animate={{ 
+            animate={{
               height: 'auto',
               opacity: 1,
               transition: {
@@ -360,7 +360,7 @@ export const TaskCard = ({ item, minScore = 0, maxScore = 100, onTap, onEdit, on
                 opacity: { duration: 0.15, delay: 0.05 }
               }
             }}
-            exit={{ 
+            exit={{
               opacity: 0,
               height: 0,
               transition: {
@@ -373,19 +373,19 @@ export const TaskCard = ({ item, minScore = 0, maxScore = 100, onTap, onEdit, on
             <div className="space-y-2 pt-2 border-t border-border">
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground font-semibold">ВАЖНО?</span>
-                <span className="text-sm font-numbers font-bold">{item.priority}</span>
+                <span className="text-sm text-muted-foreground font-numbers font-bold">{item.priority}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground font-semibold">ХОЧУ?</span>
-                <span className="text-sm font-numbers font-bold">{item.desire}</span>
+                <span className="text-sm text-muted-foreground font-numbers font-bold">{item.desire}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground font-semibold">СЛОЖНО?</span>
-                <span className="text-sm font-numbers font-bold">{item.difficulty}</span>
+                <span className="text-sm text-muted-foreground font-numbers font-bold">{item.difficulty}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground font-semibold">ГОТОВО%</span>
-                <span className="text-sm font-numbers font-bold">{item.percent}%</span>
+                <span className="text-sm text-muted-foreground font-numbers font-bold">{item.percent}%</span>
               </div>
             </div>
           </motion.div>

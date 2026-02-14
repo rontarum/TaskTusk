@@ -35,7 +35,7 @@ export const theme = {
             secondaryForeground: "#0A0A0F",
 
             muted: "#E0E8F5",
-            mutedForeground: "#425d81ff",
+            mutedForeground: "#758BA8",
 
             accent: "#E6F4F4",
             accentForeground: "#1A2138",
