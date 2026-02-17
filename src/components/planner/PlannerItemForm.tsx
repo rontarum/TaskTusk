@@ -31,16 +31,18 @@ export function PlannerItemForm({ onAdd }: Props) {
           style={{ transform: "translateZ(60px)" }}
         />
 
-        <Input
-          aria-label="Item text"
-          placeholder="Новая задача"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") submit();
-          }}
-          className="h-11 min-w-0 flex-1 rounded-xl px-4"
-        />
+        <div className="relative flex-1 min-w-0" style={{ transform: "translateZ(60px)", isolation: "isolate" }}>
+          <Input
+            aria-label="Item text"
+            placeholder="Новая задача"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") submit();
+            }}
+            className="h-11 min-w-0 flex-1 rounded-xl px-4 relative z-10"
+          />
+        </div>
 
         <div className="no-elevate" style={{ transform: "translateZ(60px)", transformStyle: "preserve-3d" }}>
           <Button

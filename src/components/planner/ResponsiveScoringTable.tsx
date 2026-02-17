@@ -19,6 +19,8 @@ interface ResponsiveScoringTableProps {
   isFormOpen?: boolean;
   completingItemId?: string;
   onCompletingItemComplete?: () => void;
+  desktopCompletingItemId?: string;
+  onDesktopCompletingItemComplete?: () => void;
 }
 
 export const ResponsiveScoringTable = ({
@@ -34,6 +36,8 @@ export const ResponsiveScoringTable = ({
   isFormOpen,
   completingItemId,
   onCompletingItemComplete,
+  desktopCompletingItemId,
+  onDesktopCompletingItemComplete,
 }: ResponsiveScoringTableProps) => {
   const isMobile = deviceType === 'mobile';
   const isTablet = deviceType === 'tablet';
@@ -100,6 +104,8 @@ export const ResponsiveScoringTable = ({
         order={order}
         onUpdate={onUpdate}
         onEditingChange={onEditingChange}
+        completingItemId={desktopCompletingItemId}
+        onCompletingItemComplete={onDesktopCompletingItemComplete}
       />
     );
   }
@@ -111,6 +117,8 @@ export const ResponsiveScoringTable = ({
       order={order}
       onUpdate={onUpdate}
       onEditingChange={onEditingChange}
+      completingItemId={desktopCompletingItemId}
+      onCompletingItemComplete={onDesktopCompletingItemComplete}
     />
   );
 };

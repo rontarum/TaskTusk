@@ -39,7 +39,9 @@ const Index = () => {
   const [editingItem, setEditingItem] = React.useState<PlannerItem | undefined>();
   const [sortDelayPending, setSortDelayPending] = React.useState(false);
   const [completingItemId, setCompletingItemId] = React.useState<string | null>(null);
+  const [desktopCompletingItemId, setDesktopCompletingItemId] = React.useState<string | null>(null);
   const sortDelayTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const desktopCompletionTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const frozenOrderRef = React.useRef<string[] | null>(null); // Store order before changes
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
 
@@ -138,6 +140,22 @@ const Index = () => {
 
   function updateItem(id: string, patch: Partial<PlannerItem>) {
     freezeOrderForDelay();
+
+    // Check if this is a desktop completion (percent === 100)
+    if (!isMobile && patch.percent === 100) {
+      const item = items.find((it) => it.id === id);
+      if (item && item.percent !== 100) {
+        // Clear any existing completion timer
+        if (desktopCompletionTimerRef.current) {
+          clearTimeout(desktopCompletionTimerRef.current);
+        }
+        // Set a 1000ms delay before triggering completion animation
+        desktopCompletionTimerRef.current = setTimeout(() => {
+          setDesktopCompletingItemId(id);
+        }, 1000);
+      }
+    }
+
     setItems((prev) => prev.map((it) => (it.id === id ? { ...it, ...patch } : it)));
   }
 
@@ -194,6 +212,14 @@ const Index = () => {
     if (completingItemId) {
       deleteItem(completingItemId);
       setCompletingItemId(null);
+    }
+  }
+
+  // Handle desktop completion animation finish
+  function handleDesktopCompletingItemComplete() {
+    if (desktopCompletingItemId) {
+      deleteItem(desktopCompletingItemId);
+      setDesktopCompletingItemId(null);
     }
   }
 
@@ -377,6 +403,8 @@ const Index = () => {
                       onSelect={setActiveId}
                       onDelete={deleteItem}
                       onUpdate={updateItem}
+                      completingItemId={desktopCompletingItemId || undefined}
+                      onCompletingItemComplete={handleDesktopCompletingItemComplete}
                     />
                   </div>
                 </TiltCard>
@@ -398,6 +426,8 @@ const Index = () => {
                 isFormOpen={isMobileFormOpen}
                 completingItemId={completingItemId || undefined}
                 onCompletingItemComplete={handleCompletingItemComplete}
+                desktopCompletingItemId={desktopCompletingItemId || undefined}
+                onDesktopCompletingItemComplete={handleDesktopCompletingItemComplete}
               />
             </section>
           </div>

@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Trash2 } from "lucide-react";
 import { EmojiPicker } from "./EmojiPicker";
+import { DesktopTaskCompletionAnimation } from "./DesktopTaskCompletionAnimation";
 import type { PlannerItem } from "./types";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -14,6 +15,8 @@ type Props = {
   onDelete: (id: string) => void;
   onUpdate: (id: string, patch: Partial<PlannerItem>) => void;
   variant?: "standalone" | "embedded";
+  completingItemId?: string;
+  onCompletingItemComplete?: () => void;
 };
 
 const itemVariants = {
@@ -29,6 +32,8 @@ export function PlannerItemList({
   onDelete,
   onUpdate,
   variant = "standalone",
+  completingItemId,
+  onCompletingItemComplete,
 }: Props) {
   const isEmbedded = variant === "embedded";
 
@@ -79,6 +84,29 @@ export function PlannerItemList({
         {items.map((it) => {
           const isActive = it.id === activeId;
           const isEditing = editingTextId === it.id;
+          const isCompleting = completingItemId === it.id;
+
+          // If this item is completing, show the completion animation instead
+          if (isCompleting) {
+            return (
+              <motion.li
+                key={it.id}
+                variants={itemVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+                style={{ transformStyle: "preserve-3d" }}
+              >
+                <DesktopTaskCompletionAnimation
+                  item={it}
+                  isVisible={true}
+                  onComplete={onCompletingItemComplete || (() => {})}
+                  className="!transform !translate-z-[40px]"
+                />
+              </motion.li>
+            );
+          }
 
           return (
             <motion.li
