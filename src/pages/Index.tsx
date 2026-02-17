@@ -15,7 +15,6 @@ import { MobileSettingsPanel } from "@/components/MobileSettingsPanel";
 import type { PlannerItem } from "@/components/planner/types";
 import { scoreOf } from "@/components/planner/scoring";
 import { cn } from "@/lib/utils";
-import { triggerHaptic } from "@/lib/haptic";
 import { motion } from "framer-motion";
 import { BackgroundGradientAnimation } from "@/components/ui/background-gradient-animation";
 import { ParallaxLogo } from "@/components/ParallaxLogo";
@@ -414,7 +413,9 @@ const Index = () => {
                 sorted ? "bg-primary/20 text-primary border border-primary" : "bg-background/80 backdrop-blur-sm text-foreground border border-border"
               )}
               onClick={() => {
-                triggerHaptic(50);
+                if ('vibrate' in navigator) {
+                  navigator.vibrate(50);
+                }
                 setSorted((s) => !s);
               }}
               disabled={items.length < 2}
@@ -433,7 +434,9 @@ const Index = () => {
             <motion.button
               className="fixed bottom-4 right-4 z-30 w-14 h-14 bg-primary text-primary-foreground rounded-2xl shadow-lg flex items-center justify-center"
               onClick={() => {
-                triggerHaptic(50);
+                if ('vibrate' in navigator) {
+                  navigator.vibrate(50);
+                }
                 setMobileFormMode('add');
                 setEditingItem(undefined);
                 setIsMobileFormOpen(true);

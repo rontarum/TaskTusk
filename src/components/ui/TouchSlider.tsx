@@ -2,7 +2,6 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useMobileViewport } from '@/hooks/use-mobile-viewport';
-import { triggerHaptic } from '@/lib/haptic';
 
 interface TouchSliderProps {
   min: number;
@@ -70,8 +69,8 @@ export const TouchSlider = ({
     setDisplayValue(newValue);
 
     // Haptic feedback on step change
-    if (newValue !== lastVibrateRef.current) {
-      triggerHaptic(10);
+    if (newValue !== lastVibrateRef.current && 'vibrate' in navigator) {
+      navigator.vibrate(10);
       lastVibrateRef.current = newValue;
     }
   }, [calculateValue]);
