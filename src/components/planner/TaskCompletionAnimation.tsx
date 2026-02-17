@@ -39,7 +39,7 @@ export const TaskCompletionAnimation = ({
     if (isVisible && showContent) {
       const timer = setTimeout(() => {
         setShowContent(false);
-      }, 1200); // Wait for all animations to complete
+      }, 1000); // Reduced from 1200ms for faster completion
       return () => clearTimeout(timer);
     }
   }, [isVisible, showContent]);
@@ -56,43 +56,36 @@ export const TaskCompletionAnimation = ({
           animate={{ opacity: 1 }}
           exit={{
             opacity: 0,
+            scale: 0.95,
             transition: {
-              duration: 0.2,
+              duration: 0.15,
               ease: 'easeOut',
             },
           }}
+          style={{ willChange: 'transform, opacity' }}
         >
-          {/* Fill animation - left to right with gradient edge */}
+          {/* Fill animation - left to right with CSS transition for better performance */}
           <motion.div
             className="absolute inset-0"
-            initial={{ width: '0%' }}
-            animate={{ width: '100%' }}
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
             transition={{
-              duration: 0.5,
+              duration: 0.4,
               ease: [0.25, 0.1, 0.25, 1],
             }}
             style={{
               background: 'hsl(var(--primary))',
+              transformOrigin: 'left',
+              willChange: 'transform',
             }}
-          >
-            {/* Gradient edge for soft effect */}
-            <motion.div
-              className="absolute right-0 top-0 bottom-0 w-8"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3, duration: 0.2 }}
-              style={{
-                background: 'linear-gradient(to left, hsl(var(--primary)), transparent)',
-              }}
-            />
-          </motion.div>
+          />
 
           {/* Content container - fades out as fill happens */}
           <motion.div
             className="relative z-10"
             initial={{ opacity: 1 }}
             animate={{ opacity: 0 }}
-            transition={{ delay: 0.3, duration: 0.2 }}
+            transition={{ delay: 0.2, duration: 0.15 }}
           >
             {/* Original content hidden - emoji + text */}
             <div className="flex items-start justify-between gap-3 mb-3">
@@ -111,19 +104,18 @@ export const TaskCompletionAnimation = ({
             className="absolute inset-0 flex items-center justify-center z-20"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.5, duration: 0.3 }}
+            transition={{ delay: 0.4, duration: 0.2 }}
           >
             <div className="flex items-center gap-3">
-              {/* Large emoji */}
+              {/* Large emoji - simplified animation */}
               <motion.span
                 className="text-3xl"
-                initial={{ scale: 0.5, opacity: 0 }}
+                initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{
-                  delay: 0.6,
-                  type: 'spring',
-                  stiffness: 400,
-                  damping: 20,
+                  delay: 0.45,
+                  duration: 0.2,
+                  ease: 'easeOut',
                 }}
               >
                 {item.emoji}
@@ -132,13 +124,12 @@ export const TaskCompletionAnimation = ({
               {/* Title - large white text */}
               <motion.h3
                 className="font-heading font-bold text-2xl text-white max-w-[180px] line-clamp-2"
-                initial={{ scale: 0.5, opacity: 0, x: -20 }}
-                animate={{ scale: 1, opacity: 1, x: 0 }}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
                 transition={{
-                  delay: 0.7,
-                  type: 'spring',
-                  stiffness: 400,
-                  damping: 20,
+                  delay: 0.5,
+                  duration: 0.2,
+                  ease: 'easeOut',
                 }}
               >
                 {item.text}
@@ -146,13 +137,12 @@ export const TaskCompletionAnimation = ({
 
               {/* Checkmark - white, no circle */}
               <motion.div
-                initial={{ scale: 0, opacity: 0 }}
+                initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{
-                  delay: 0.8,
-                  type: 'spring',
-                  stiffness: 400,
-                  damping: 20,
+                  delay: 0.55,
+                  duration: 0.2,
+                  ease: 'easeOut',
                 }}
               >
                 <Check className="w-8 h-8 text-white" strokeWidth={3} />
