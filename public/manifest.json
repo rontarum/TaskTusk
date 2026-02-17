@@ -1,0 +1,39 @@
+{
+  "name": "TaskTusk",
+  "short_name": "TaskTusk",
+  "description": "Выполняй задачи в верном порядке",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#EDEDED",
+  "theme_color": "#2DD4BF",
+  "orientation": "portrait",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-mobile.jpg",
+      "sizes": "750x1334",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "TaskTusk Mobile View"
+    },
+    {
+      "src": "/screenshot-desktop.jpg",
+      "sizes": "1920x1080",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "TaskTusk Desktop View"
+    }
+  ]
+}

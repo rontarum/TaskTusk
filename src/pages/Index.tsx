@@ -87,7 +87,20 @@ const Index = () => {
       setIsPWAInstallOpen(true);
     }, 1500);
 
-    return () => clearTimeout(timer);
+    // Always listen for the beforeinstallprompt event to capture it
+    const handleBeforeInstallPrompt = (e: Event) => {
+      // Prevent the mini-infobar from appearing on mobile
+      e.preventDefault();
+      // Store the event for later use
+      deferredPromptRef.current = e as BeforeInstallPromptEvent;
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
 
     /* Original logic - uncomment after debugging:
     // Check if already installed (display-mode: standalone)
