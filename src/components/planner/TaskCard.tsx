@@ -300,7 +300,7 @@ export const TaskCard = ({ item, minScore = 0, maxScore = 100, onTap, onEdit, on
         className={cn('paper p-4 cursor-pointer relative z-10 swipeable', className)}
         onClick={handleTap}
         whileTap={swipeState.isDragging ? undefined : { scale: 0.98 }}
-          transition={{ 
+          transition={{
             x: { type: 'spring', stiffness: 400, damping: 30 },
             opacity: { duration: 0.1 }
           }}

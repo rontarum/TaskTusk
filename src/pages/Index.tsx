@@ -12,6 +12,7 @@ import { ResponsiveHeader } from "@/components/ResponsiveHeader";
 import { MobileMenu } from "@/components/MobileMenu";
 import { MobileTaskForm } from "@/components/planner/MobileTaskForm";
 import { MobileSettingsPanel } from "@/components/MobileSettingsPanel";
+import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import type { PlannerItem } from "@/components/planner/types";
 import { scoreOf } from "@/components/planner/scoring";
 import { cn } from "@/lib/utils";
@@ -26,6 +27,14 @@ function uid() {
 }
 
 const STORAGE_KEY = "decision-planner:v1";
+const PWA_PROMPT_DISMISSED_KEY = "tasktusk:pwa-prompt-dismissed";
+
+// Type for the beforeinstallprompt event
+interface BeforeInstallPromptEvent extends Event {
+  readonly platforms: string[];
+  readonly userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
+  prompt(): Promise<void>;
+}
 
 const Index = () => {
   const [items, setItems] = useLocalStorageState<PlannerItem[]>(STORAGE_KEY, []);
@@ -40,6 +49,9 @@ const Index = () => {
   const [sortDelayPending, setSortDelayPending] = React.useState(false);
   const [completingItemId, setCompletingItemId] = React.useState<string | null>(null);
   const [desktopCompletingItemId, setDesktopCompletingItemId] = React.useState<string | null>(null);
+  const [isPWAInstallOpen, setIsPWAInstallOpen] = React.useState(false);
+  const [pwaPromptDismissed, setPwaPromptDismissed] = useLocalStorageState<boolean>(PWA_PROMPT_DISMISSED_KEY, false);
+  const deferredPromptRef = React.useRef<BeforeInstallPromptEvent | null>(null);
   const sortDelayTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const desktopCompletionTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const frozenOrderRef = React.useRef<string[] | null>(null); // Store order before changes
@@ -63,6 +75,67 @@ const Index = () => {
     if (activeId && items.some((i) => i.id === activeId)) return;
     setActiveId(items[0]?.id ?? null);
   }, [activeId, items]);
+
+  // PWA install prompt handling
+  React.useEffect(() => {
+    // Only handle on mobile devices
+    if (!isMobile) return;
+
+    // DEBUG: Always show the prompt for testing
+    // Show after a short delay to allow the app to render
+    const timer = setTimeout(() => {
+      setIsPWAInstallOpen(true);
+    }, 1500);
+
+    return () => clearTimeout(timer);
+
+    /* Original logic - uncomment after debugging:
+    // Check if already installed (display-mode: standalone)
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+                         (window.navigator as unknown as { standalone?: boolean }).standalone === true;
+
+    if (isStandalone || pwaPromptDismissed) return;
+
+    const handleBeforeInstallPrompt = (e: Event) => {
+      // Prevent the mini-infobar from appearing on mobile
+      e.preventDefault();
+      // Store the event for later use
+      deferredPromptRef.current = e as BeforeInstallPromptEvent;
+      // Show our custom prompt after a short delay
+      setTimeout(() => {
+        setIsPWAInstallOpen(true);
+      }, 2000);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+    */
+  }, [isMobile]);
+
+  const handlePWAInstall = async () => {
+    if (!deferredPromptRef.current) return;
+
+    // Show the browser's install prompt
+    void deferredPromptRef.current.prompt();
+
+    // Wait for the user to respond
+    const { outcome } = await deferredPromptRef.current.userChoice;
+
+    if (outcome === 'accepted') {
+      // User accepted the install
+      deferredPromptRef.current = null;
+    }
+
+    setIsPWAInstallOpen(false);
+  };
+
+  const handlePWADismiss = () => {
+    setPwaPromptDismissed(true);
+    setIsPWAInstallOpen(false);
+  };
 
   // Delay sorting by 1 second after item updates (only on desktop)
   React.useEffect(() => {
@@ -497,6 +570,13 @@ const Index = () => {
         <MobileSettingsPanel
           isOpen={isSettingsOpen}
           onClose={() => setIsSettingsOpen(false)}
+        />
+
+        {/* PWA Install Prompt */}
+        <PWAInstallPrompt
+          isOpen={isPWAInstallOpen}
+          onClose={handlePWADismiss}
+          onInstall={handlePWAInstall}
         />
       </div>
     </BackgroundGradientAnimation>
