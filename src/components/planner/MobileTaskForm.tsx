@@ -6,6 +6,7 @@ import { BottomSheet } from '@/components/ui/BottomSheet';
 import { MobileEmojiPicker } from '@/components/planner/MobileEmojiPicker';
 import { PlannerItem } from '@/components/planner/types';
 import { useMobileViewport, useKeyboardHeight } from '@/hooks/use-mobile-viewport';
+import { triggerHaptic } from '@/lib/haptic';
 
 interface MobileTaskFormProps {
   isOpen: boolean;
@@ -58,9 +59,7 @@ export const MobileTaskForm = ({
     }
 
     // Haptic feedback on save
-    if ('vibrate' in navigator) {
-      navigator.vibrate(50);
-    }
+    triggerHaptic(50);
 
     onSubmit({
       text: text.trim(),
@@ -134,9 +133,7 @@ export const MobileTaskForm = ({
               type="button"
               className="flex items-center justify-center p-3 border border-border rounded-2xl hover:bg-muted transition-colors w-14 h-14"
               onClick={() => {
-                if ('vibrate' in navigator) {
-                  navigator.vibrate(50);
-                }
+                triggerHaptic(50);
                 setIsEmojiPickerOpen(true);
               }}
             >

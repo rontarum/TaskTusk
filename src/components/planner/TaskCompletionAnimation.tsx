@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Check } from 'lucide-react';
 import { PlannerItem } from '@/components/planner/types';
 import { cn } from '@/lib/utils';
+import { triggerHaptic } from '@/lib/haptic';
 
 interface TaskCompletionAnimationProps {
   item: PlannerItem;
@@ -22,9 +23,7 @@ export const TaskCompletionAnimation = ({
   useEffect(() => {
     if (isVisible) {
       // Trigger haptic feedback on mount (iPhone vibration)
-      if ('vibrate' in navigator) {
-        navigator.vibrate(50);
-      }
+      triggerHaptic(50);
       setShowContent(true);
     }
   }, [isVisible]);
@@ -32,9 +31,7 @@ export const TaskCompletionAnimation = ({
   // Handle exit animation completion
   const handleExitComplete = () => {
     // Haptic feedback before removing the card
-    if ('vibrate' in navigator) {
-      navigator.vibrate(50);
-    }
+    triggerHaptic(50);
     onComplete();
   };
 

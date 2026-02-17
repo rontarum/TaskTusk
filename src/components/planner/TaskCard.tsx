@@ -5,6 +5,7 @@ import { PlannerItem } from '@/components/planner/types';
 import { scoreOf, scoreColor } from '@/components/planner/scoring';
 import { ProgressBar } from '@/components/planner/ProgressBar';
 import { cn } from '@/lib/utils';
+import { triggerHaptic } from '@/lib/haptic';
 
 interface TaskCardProps {
   item: PlannerItem;
@@ -86,9 +87,7 @@ export const TaskCard = ({ item, minScore = 0, maxScore = 100, onTap, onEdit, on
 
     longPressTimerRef.current = setTimeout(() => {
       // Haptic feedback
-      if ('vibrate' in navigator) {
-        navigator.vibrate(50);
-      }
+      triggerHaptic(50);
 
       setContextMenuPosition({ x: clientX, y: clientY });
       setShowContextMenu(true);
@@ -175,9 +174,7 @@ export const TaskCard = ({ item, minScore = 0, maxScore = 100, onTap, onEdit, on
     // Trigger action if past threshold (regardless of velocity)
     if (Math.abs(offset) > threshold && swipeState.direction === 'horizontal') {
       // Haptic feedback when reaching threshold
-      if ('vibrate' in navigator) {
-        navigator.vibrate(50);
-      }
+      triggerHaptic(50);
 
       if (offset < 0 && onDelete) {
         // Delete: fade indicator quickly, then animate card off
