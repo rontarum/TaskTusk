@@ -281,10 +281,8 @@ export const TaskCard = ({ item, minScore = 0, maxScore = 100, onTap, onEdit, on
 
       {/* Card */}
       <motion.div
-        ref={cardRef}
-        layout
-        layoutId={`card-${item.id}`}
-        drag="x"
+          ref={cardRef}
+          drag="x"
         dragConstraints={{ left: -150, right: 150 }}
         dragElastic={0.1}
         dragDirectionLock={true}
@@ -302,11 +300,10 @@ export const TaskCard = ({ item, minScore = 0, maxScore = 100, onTap, onEdit, on
         className={cn('paper p-4 cursor-pointer relative z-10 swipeable', className)}
         onClick={handleTap}
         whileTap={swipeState.isDragging ? undefined : { scale: 0.98 }}
-        transition={{ 
-          layout: { type: 'spring', stiffness: 300, damping: 30 },
-          height: { duration: 0.15, ease: 'easeOut' },
-          opacity: { duration: 0.1 }
-        }}
+          transition={{ 
+            x: { type: 'spring', stiffness: 400, damping: 30 },
+            opacity: { duration: 0.1 }
+          }}
         style={{ userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
       >
       {/* Header: Emoji + Name + Score */}
@@ -330,44 +327,61 @@ export const TaskCard = ({ item, minScore = 0, maxScore = 100, onTap, onEdit, on
       </div>
 
       {/* Visual Indicators (compact) */}
-      {!isExpanded && (
-        <div className="flex items-center gap-4 text-sm text-muted-foreground font-semibold">
-          <div className="flex items-center gap-1">
-            <Star className="w-4 h-4" strokeWidth={3.6} />
-            <span className="font-numbers font-bold">{item.priority}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Heart className="w-4 h-4" strokeWidth={4.0} />
-            <span className="font-numbers font-bold">{item.desire}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Zap className="w-4 h-4" strokeWidth={3.0} />
-            <span className="font-numbers font-bold">{item.difficulty}</span>
-          </div>
-        </div>
-      )}
-
-      {/* Expanded Details */}
-      {isExpanded && (
-        <div className="space-y-2 pt-3 mt-3 border-t border-border/40 overflow-hidden">
-          <div className="flex justify-between items-center transition-all duration-300">
-            <span className="text-sm text-muted-foreground font-semibold">ВАЖНО?</span>
-            <span className="text-sm text-muted-foreground font-numbers font-bold">{item.priority}</span>
-          </div>
-          <div className="flex justify-between items-center transition-all duration-300">
-            <span className="text-sm text-muted-foreground font-semibold">ХОЧУ?</span>
-            <span className="text-sm text-muted-foreground font-numbers font-bold">{item.desire}</span>
-          </div>
-          <div className="flex justify-between items-center transition-all duration-300">
-            <span className="text-sm text-muted-foreground font-semibold">СЛОЖНО?</span>
-            <span className="text-sm text-muted-foreground font-numbers font-bold">{item.difficulty}</span>
-          </div>
-          <div className="flex justify-between items-center transition-all duration-300">
-            <span className="text-sm text-muted-foreground font-semibold">ГОТОВО%</span>
-            <span className="text-sm text-muted-foreground font-numbers font-bold">{item.percent}%</span>
-          </div>
-        </div>
-      )}
+      <AnimatePresence initial={false} mode="wait">
+        {!isExpanded ? (
+          <motion.div
+            key="compact"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+            style={{ overflow: 'hidden' }}
+          >
+            <div className="flex items-center gap-4 text-sm text-muted-foreground font-semibold">
+              <div className="flex items-center gap-1">
+                <Star className="w-4 h-4" strokeWidth={3.6} />
+                <span className="font-numbers font-bold">{item.priority}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Heart className="w-4 h-4" strokeWidth={4.0} />
+                <span className="font-numbers font-bold">{item.desire}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Zap className="w-4 h-4" strokeWidth={3.0} />
+                <span className="font-numbers font-bold">{item.difficulty}</span>
+              </div>
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="expanded"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+            style={{ overflow: 'hidden' }}
+          >
+            <div className="space-y-2 pt-3 mt-3 border-t border-border/40">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground font-semibold">ВАЖНО?</span>
+                <span className="text-sm text-muted-foreground font-numbers font-bold">{item.priority}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground font-semibold">ХОЧУ?</span>
+                <span className="text-sm text-muted-foreground font-numbers font-bold">{item.desire}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground font-semibold">СЛОЖНО?</span>
+                <span className="text-sm text-muted-foreground font-numbers font-bold">{item.difficulty}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground font-semibold">ГОТОВО%</span>
+                <span className="text-sm text-muted-foreground font-numbers font-bold">{item.percent}%</span>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
     </div>
   );
