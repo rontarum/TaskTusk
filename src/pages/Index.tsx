@@ -412,12 +412,7 @@ const Index = () => {
                 "fixed bottom-4 right-20 z-30 w-14 h-14 rounded-2xl shadow-lg flex items-center justify-center transition-colors",
                 sorted ? "bg-primary/20 text-primary border border-primary" : "bg-background/80 backdrop-blur-sm text-foreground border border-border"
               )}
-              onClick={() => {
-                if ('vibrate' in navigator) {
-                  navigator.vibrate(50);
-                }
-                setSorted((s) => !s);
-              }}
+              onClick={() => setSorted((s) => !s)}
               disabled={items.length < 2}
               whileTap={{ scale: 0.95 }}
               whileHover={{ scale: 1.05 }}
@@ -434,9 +429,6 @@ const Index = () => {
             <motion.button
               className="fixed bottom-4 right-4 z-30 w-14 h-14 bg-primary text-primary-foreground rounded-2xl shadow-lg flex items-center justify-center"
               onClick={() => {
-                if ('vibrate' in navigator) {
-                  navigator.vibrate(50);
-                }
                 setMobileFormMode('add');
                 setEditingItem(undefined);
                 setIsMobileFormOpen(true);

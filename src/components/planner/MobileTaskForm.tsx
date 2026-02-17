@@ -57,11 +57,6 @@ export const MobileTaskForm = ({
       return;
     }
 
-    // Haptic feedback on save
-    if ('vibrate' in navigator) {
-      navigator.vibrate(50);
-    }
-
     onSubmit({
       text: text.trim(),
       emoji,
@@ -133,12 +128,7 @@ export const MobileTaskForm = ({
             <button
               type="button"
               className="flex items-center justify-center p-3 border border-border rounded-2xl hover:bg-muted transition-colors w-14 h-14"
-              onClick={() => {
-                if ('vibrate' in navigator) {
-                  navigator.vibrate(50);
-                }
-                setIsEmojiPickerOpen(true);
-              }}
+              onClick={() => setIsEmojiPickerOpen(true)}
             >
               <span className="text-2xl">{emoji}</span>
             </button>
