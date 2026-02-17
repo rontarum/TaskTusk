@@ -38,6 +38,7 @@ const Index = () => {
   const [mobileFormMode, setMobileFormMode] = React.useState<'add' | 'edit'>('add');
   const [editingItem, setEditingItem] = React.useState<PlannerItem | undefined>();
   const [sortDelayPending, setSortDelayPending] = React.useState(false);
+  const [completingItemId, setCompletingItemId] = React.useState<string | null>(null);
   const sortDelayTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const frozenOrderRef = React.useRef<string[] | null>(null); // Store order before changes
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
@@ -167,9 +168,32 @@ const Index = () => {
 
   function handleMobileFormSubmit(data: { text: string; emoji: string; priority: number; desire: number; difficulty: number; percent: number }) {
     if (mobileFormMode === 'edit' && editingItem) {
-      updateItem(editingItem.id, data);
+      // Check if completing (percent = 100) and is on mobile
+      const isCompleting = data.percent === 100 && isMobile;
+
+      if (isCompleting) {
+        // Update the item with the new data
+        updateItem(editingItem.id, data);
+        // Close form first
+        setIsMobileFormOpen(false);
+        setEditingItem(undefined);
+        // Trigger completion animation after 600ms delay
+        setTimeout(() => {
+          setCompletingItemId(editingItem.id);
+        }, 1000);
+      } else {
+        updateItem(editingItem.id, data);
+      }
     } else {
       addItemMobile(data);
+    }
+  }
+
+  // Handle completion animation finish
+  function handleCompletingItemComplete() {
+    if (completingItemId) {
+      deleteItem(completingItemId);
+      setCompletingItemId(null);
     }
   }
 
@@ -372,6 +396,8 @@ const Index = () => {
                 onCardDelete={deleteItem}
                 onCardDuplicate={duplicateItem}
                 isFormOpen={isMobileFormOpen}
+                completingItemId={completingItemId || undefined}
+                onCompletingItemComplete={handleCompletingItemComplete}
               />
             </section>
           </div>

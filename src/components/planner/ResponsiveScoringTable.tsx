@@ -1,6 +1,7 @@
 import { DeviceType } from '@/hooks/use-device';
 import { PlannerScoringTable } from '@/components/planner/PlannerScoringTable';
 import { TaskCard } from '@/components/planner/TaskCard';
+import { TaskCompletionAnimation } from '@/components/planner/TaskCompletionAnimation';
 import { PlannerItem } from '@/components/planner/types';
 import { scoreOf } from '@/components/planner/scoring';
 import { motion, LayoutGroup } from 'framer-motion';
@@ -16,6 +17,8 @@ interface ResponsiveScoringTableProps {
   onCardDelete?: (id: string) => void;
   onCardDuplicate?: (id: string) => void;
   isFormOpen?: boolean;
+  completingItemId?: string;
+  onCompletingItemComplete?: () => void;
 }
 
 export const ResponsiveScoringTable = ({
@@ -29,6 +32,8 @@ export const ResponsiveScoringTable = ({
   onCardDelete,
   onCardDuplicate,
   isFormOpen,
+  completingItemId,
+  onCompletingItemComplete,
 }: ResponsiveScoringTableProps) => {
   const isMobile = deviceType === 'mobile';
   const isTablet = deviceType === 'tablet';
@@ -43,30 +48,47 @@ export const ResponsiveScoringTable = ({
     const minScore = scores.length > 0 ? Math.min(...scores) : 0;
     const maxScore = scores.length > 0 ? Math.max(...scores) : 100;
 
-      return (
-        <LayoutGroup>
+    // Find the completing item if any
+    const completingItem = completingItemId
+      ? orderedItems.find((item) => item.id === completingItemId)
+      : undefined;
+
+    return (
+      <LayoutGroup>
         <div className="grid gap-4">
-          {orderedItems.map((item) => (
-            <motion.div
-              key={item.id}
-              layout
-              transition={{ layout: { type: 'spring', stiffness: 300, damping: 30 } }}
-            >
-              <TaskCard
-                item={item}
-                minScore={minScore}
-                maxScore={maxScore}
-                onTap={onCardTap}
-                onEdit={onCardEdit}
-                onDelete={onCardDelete}
-                onDuplicate={onCardDuplicate}
-                isFormOpen={isFormOpen}
-              />
-            </motion.div>
-          ))}
+          {orderedItems.map((item) => {
+            const isCompleting = completingItemId === item.id;
+
+            return (
+              <motion.div
+                key={item.id}
+                layout
+                transition={{ layout: { type: 'spring', stiffness: 300, damping: 30 } }}
+              >
+                {isCompleting && completingItem ? (
+                  <TaskCompletionAnimation
+                    item={completingItem}
+                    isVisible={true}
+                    onComplete={onCompletingItemComplete || (() => {})}
+                  />
+                ) : (
+                  <TaskCard
+                    item={item}
+                    minScore={minScore}
+                    maxScore={maxScore}
+                    onTap={onCardTap}
+                    onEdit={onCardEdit}
+                    onDelete={onCardDelete}
+                    onDuplicate={onCardDuplicate}
+                    isFormOpen={isFormOpen}
+                  />
+                )}
+              </motion.div>
+            );
+          })}
         </div>
-        </LayoutGroup>
-      );
+      </LayoutGroup>
+    );
   }
 
   // Tablet: Simplified table (TODO: implement simplified 4-column table)
