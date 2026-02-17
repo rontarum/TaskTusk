@@ -10,6 +10,7 @@ export default defineConfig(({ mode }) => ({
       overlay: false,
     },
   },
+  base: "./",
   plugins: [react()].filter(Boolean),
   resolve: {
     alias: {

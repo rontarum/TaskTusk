@@ -105,6 +105,9 @@ const Index = () => {
   }, [pwaPromptDismissed]);
 
   const handlePWAInstall = async () => {
+    // Mark as dismissed so it never shows again
+    setPwaPromptDismissed(true);
+
     if (!deferredPromptRef.current) {
       // Close the dialog if no prompt available
       setIsPWAInstallOpen(false);
@@ -130,6 +133,7 @@ const Index = () => {
   };
 
   const handlePWADismiss = () => {
+    // Mark as dismissed so it never shows again
     setPwaPromptDismissed(true);
     setIsPWAInstallOpen(false);
   };

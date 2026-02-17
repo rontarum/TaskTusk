@@ -8,12 +8,14 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker
       .register('/sw.js')
       .then((registration) => {
-        console.log('SW registered:', registration);
+        console.log('SW registered:', registration.scope);
       })
       .catch((error) => {
-        console.log('SW registration failed:', error);
+        console.error('SW registration failed:', error);
       });
   });
+} else {
+  console.warn('Service Worker not supported');
 }
 
 createRoot(document.getElementById("root")!).render(<App />);
