@@ -31,6 +31,10 @@ export const TaskCompletionAnimation = ({
 
   // Handle exit animation completion
   const handleExitComplete = () => {
+    // Haptic feedback before removing the card
+    if ('vibrate' in navigator) {
+      navigator.vibrate(50);
+    }
     onComplete();
   };
 
