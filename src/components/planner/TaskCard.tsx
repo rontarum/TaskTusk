@@ -300,17 +300,11 @@ export const TaskCard = ({ item, minScore = 0, maxScore = 100, onTap, onEdit, on
         className={cn('paper p-4 cursor-pointer relative z-10 swipeable', className)}
         onClick={handleTap}
         whileTap={swipeState.isDragging ? undefined : { scale: 0.98 }}
-          transition={{
+          transition={{ 
             x: { type: 'spring', stiffness: 400, damping: 30 },
             opacity: { duration: 0.1 }
           }}
-        style={{
-          userSelect: 'none',
-          WebkitUserSelect: 'none',
-          WebkitTouchCallout: 'none',
-          willChange: 'transform',
-          contain: 'layout style paint',
-        }}
+        style={{ userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
       >
       {/* Header: Emoji + Name + Score */}
       <div className="flex items-start justify-between gap-3 mb-3">

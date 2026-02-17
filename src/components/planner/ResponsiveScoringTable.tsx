@@ -4,7 +4,7 @@ import { TaskCard } from '@/components/planner/TaskCard';
 import { TaskCompletionAnimation } from '@/components/planner/TaskCompletionAnimation';
 import { PlannerItem } from '@/components/planner/types';
 import { scoreOf } from '@/components/planner/scoring';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, LayoutGroup } from 'framer-motion';
 
 interface ResponsiveScoringTableProps {
   deviceType: DeviceType;
@@ -58,19 +58,16 @@ export const ResponsiveScoringTable = ({
       : undefined;
 
     return (
-      <div className="grid gap-4">
-        <AnimatePresence mode="popLayout">
+      <LayoutGroup>
+        <div className="grid gap-4">
           {orderedItems.map((item) => {
             const isCompleting = completingItemId === item.id;
 
             return (
               <motion.div
                 key={item.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.2, ease: 'easeOut' }}
-                style={{ willChange: 'transform, opacity' }}
+                layout
+                transition={{ layout: { type: 'spring', stiffness: 300, damping: 30 } }}
               >
                 {isCompleting && completingItem ? (
                   <TaskCompletionAnimation
@@ -93,8 +90,8 @@ export const ResponsiveScoringTable = ({
               </motion.div>
             );
           })}
-        </AnimatePresence>
-      </div>
+        </div>
+      </LayoutGroup>
     );
   }
 
