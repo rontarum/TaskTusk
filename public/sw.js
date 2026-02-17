@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tasktusk-v1';
+const CACHE_NAME = 'tasktusk-v1.02';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -37,7 +37,7 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch event - serve from cache or network
+// Fetch event - network first for HTML/JS/CSS, cache first for static assets
 self.addEventListener('fetch', (event) => {
   // Skip non-GET requests
   if (event.request.method !== 'GET') return;
@@ -45,34 +45,63 @@ self.addEventListener('fetch', (event) => {
   // Skip cross-origin requests
   if (!event.request.url.startsWith(self.location.origin)) return;
 
-  event.respondWith(
-    caches.match(event.request).then((cached) => {
-      // Return cached version if available
-      if (cached) {
-        return cached;
-      }
+  const url = new URL(event.request.url);
+  const isNav = event.request.mode === 'navigate';
+  const isAsset = url.pathname.match(/\.(js|css|tsx?|jsx?)$/);
+  const isStaticAsset = STATIC_ASSETS.includes(url.pathname) ||
+                        url.pathname.match(/\.(png|jpg|jpeg|gif|svg|ico|woff|woff2)$/);
 
-      // Otherwise fetch from network
-      return fetch(event.request)
+  // For HTML and JS/CSS files - use Network First strategy
+  if (isNav || isAsset) {
+    event.respondWith(
+      fetch(event.request)
         .then((response) => {
-          // Don't cache non-successful responses
           if (!response || response.status !== 200 || response.type !== 'basic') {
             return response;
           }
-
-          // Clone the response to cache it
+          // Update cache with fresh version
           const responseToCache = response.clone();
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, responseToCache);
           });
-
           return response;
         })
         .catch(() => {
-          // If network fails and we have a cached fallback, use it
-          // Otherwise let the error propagate
+          // If network fails, try cache
+          return caches.match(event.request).then((cached) => {
+            return cached || new Response('Network error', { status: 408 });
+          });
+        })
+    );
+    return;
+  }
+
+  // For static assets - use Cache First strategy
+  if (isStaticAsset) {
+    event.respondWith(
+      caches.match(event.request).then((cached) => {
+        if (cached) {
           return cached;
-        });
-    })
+        }
+        return fetch(event.request)
+          .then((response) => {
+            if (!response || response.status !== 200 || response.type !== 'basic') {
+              return response;
+            }
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseToCache);
+            });
+            return response;
+          });
+      })
+    );
+    return;
+  }
+
+  // Default: try network, fallback to cache
+  event.respondWith(
+    fetch(event.request)
+      .catch(() => caches.match(event.request))
   );
 });
