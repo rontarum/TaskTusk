@@ -72,8 +72,8 @@ export function PlannerScoringTable({
   if (ordered.length === 0) {
     return (
       <TiltCard className="paper p-6">
-        <div className="text-sm font-medium font-heading">Оценка</div>
-        <p className="mt-1 text-sm text-muted-foreground">Создай несколько задач для оценки и сравнения.</p>
+        <div className="text-lg font-semibold font-heading">Оценка</div>
+        <p className="mt-1 text-sm text-muted-foreground">Нужна хотя бы пара тасков для оценки и сравнения.</p>
       </TiltCard>
     );
   }

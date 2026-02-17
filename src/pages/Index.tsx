@@ -76,13 +76,13 @@ const Index = () => {
     setActiveId(items[0]?.id ?? null);
   }, [activeId, items]);
 
-  // PWA install prompt handling
+  // PWA install prompt handling - runs only once on mount
   React.useEffect(() => {
     // Check if already installed (display-mode: standalone)
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
                          (window.navigator as unknown as { standalone?: boolean }).standalone === true;
 
-    // Don't show if already installed or user dismissed it
+    // Don't show if already installed or user dismissed it previously
     if (isStandalone || pwaPromptDismissed) return;
 
     // Listen for the beforeinstallprompt event
@@ -91,10 +91,8 @@ const Index = () => {
       e.preventDefault();
       // Store the event for later use
       deferredPromptRef.current = e as BeforeInstallPromptEvent;
-      // Show our custom prompt after a short delay
-      setTimeout(() => {
-        setIsPWAInstallOpen(true);
-      }, 1500);
+      // Show our custom prompt
+      setIsPWAInstallOpen(true);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -102,7 +100,8 @@ const Index = () => {
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
-  }, [pwaPromptDismissed]);
+    // Empty dependency array - run only once on mount
+  }, []);
 
   const handlePWAInstall = async () => {
     // Mark as dismissed so it never shows again

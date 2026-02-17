@@ -46,12 +46,12 @@ export function PWAInstallPrompt({ isOpen, onClose, onInstall }: PWAInstallPromp
 
                 {/* Title */}
                 <h2 className="mb-2 text-center text-xl font-semibold font-heading">
-                  Сохраните приложение на экран
+                  Добавь приложение на экран
                 </h2>
 
                 {/* Description */}
                 <p className="mb-6 text-center text-sm text-muted-foreground font-body">
-                  Установите TaskTusk как приложение для быстрого доступа и лучшего опыта использования
+                  Сохрани TaskTusk как приложение для быстрого доступа и лучшего опыта использования
                 </p>
 
                 {/* Buttons */}

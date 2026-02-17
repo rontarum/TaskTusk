@@ -34,7 +34,7 @@ export function PlannerItemForm({ onAdd }: Props) {
         <div className="relative flex-1 min-w-0" style={{ transform: "translateZ(60px)", isolation: "isolate" }}>
           <Input
             aria-label="Item text"
-            placeholder="Новая задача"
+            placeholder="Новый таск"
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={(e) => {
