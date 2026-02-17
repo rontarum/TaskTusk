@@ -78,46 +78,23 @@ const Index = () => {
 
   // PWA install prompt handling
   React.useEffect(() => {
-    // Only handle on mobile devices
-    if (!isMobile) return;
-
-    // DEBUG: Always show the prompt for testing
-    // Show after a short delay to allow the app to render
-    const timer = setTimeout(() => {
-      setIsPWAInstallOpen(true);
-    }, 1500);
-
-    // Always listen for the beforeinstallprompt event to capture it
-    const handleBeforeInstallPrompt = (e: Event) => {
-      // Prevent the mini-infobar from appearing on mobile
-      e.preventDefault();
-      // Store the event for later use
-      deferredPromptRef.current = e as BeforeInstallPromptEvent;
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    };
-
-    /* Original logic - uncomment after debugging:
     // Check if already installed (display-mode: standalone)
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
                          (window.navigator as unknown as { standalone?: boolean }).standalone === true;
 
+    // Don't show if already installed or user dismissed it
     if (isStandalone || pwaPromptDismissed) return;
 
+    // Listen for the beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: Event) => {
-      // Prevent the mini-infobar from appearing on mobile
+      // Prevent the mini-infobar from appearing
       e.preventDefault();
       // Store the event for later use
       deferredPromptRef.current = e as BeforeInstallPromptEvent;
       // Show our custom prompt after a short delay
       setTimeout(() => {
         setIsPWAInstallOpen(true);
-      }, 2000);
+      }, 1500);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -125,21 +102,28 @@ const Index = () => {
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
-    */
-  }, [isMobile]);
+  }, [pwaPromptDismissed]);
 
   const handlePWAInstall = async () => {
-    if (!deferredPromptRef.current) return;
+    if (!deferredPromptRef.current) {
+      // Close the dialog if no prompt available
+      setIsPWAInstallOpen(false);
+      return;
+    }
 
-    // Show the browser's install prompt
-    void deferredPromptRef.current.prompt();
+    try {
+      // Show the browser's install prompt
+      void deferredPromptRef.current.prompt();
 
-    // Wait for the user to respond
-    const { outcome } = await deferredPromptRef.current.userChoice;
+      // Wait for the user to respond
+      const { outcome } = await deferredPromptRef.current.userChoice;
 
-    if (outcome === 'accepted') {
-      // User accepted the install
-      deferredPromptRef.current = null;
+      if (outcome === 'accepted') {
+        // User accepted the install
+        deferredPromptRef.current = null;
+      }
+    } catch (error) {
+      console.error('Error during install prompt:', error);
     }
 
     setIsPWAInstallOpen(false);
