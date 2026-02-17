@@ -3,7 +3,7 @@ import { PlannerScoringTable } from '@/components/planner/PlannerScoringTable';
 import { TaskCard } from '@/components/planner/TaskCard';
 import { PlannerItem } from '@/components/planner/types';
 import { scoreOf } from '@/components/planner/scoring';
-import { motion } from 'framer-motion';
+import { motion, LayoutGroup } from 'framer-motion';
 
 interface ResponsiveScoringTableProps {
   deviceType: DeviceType;
@@ -43,27 +43,30 @@ export const ResponsiveScoringTable = ({
     const minScore = scores.length > 0 ? Math.min(...scores) : 0;
     const maxScore = scores.length > 0 ? Math.max(...scores) : 100;
 
-    return (
-      <motion.div
-        layout="position"
-        className="grid gap-4"
-        transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
-      >
-        {orderedItems.map((item) => (
-          <TaskCard
-            key={item.id}
-            item={item}
-            minScore={minScore}
-            maxScore={maxScore}
-            onTap={onCardTap}
-            onEdit={onCardEdit}
-            onDelete={onCardDelete}
-            onDuplicate={onCardDuplicate}
-            isFormOpen={isFormOpen}
-          />
-        ))}
-      </motion.div>
-    );
+      return (
+        <LayoutGroup>
+        <div className="grid gap-4">
+          {orderedItems.map((item) => (
+            <motion.div
+              key={item.id}
+              layout
+              transition={{ layout: { type: 'spring', stiffness: 300, damping: 30 } }}
+            >
+              <TaskCard
+                item={item}
+                minScore={minScore}
+                maxScore={maxScore}
+                onTap={onCardTap}
+                onEdit={onCardEdit}
+                onDelete={onCardDelete}
+                onDuplicate={onCardDuplicate}
+                isFormOpen={isFormOpen}
+              />
+            </motion.div>
+          ))}
+        </div>
+        </LayoutGroup>
+      );
   }
 
   // Tablet: Simplified table (TODO: implement simplified 4-column table)

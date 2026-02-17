@@ -1,0 +1,9 @@
+{
+  "projectId": "2fda0a45-5881-4ab4-bfb7-8b02aa3b1b58",
+  "createdAt": 1771318894944,
+  "version": "1.0",
+  "startupCommands": [
+    "npm install && npx vite --port 8080"
+  ],
+  "templateId": "any"
+}

@@ -20,17 +20,22 @@ export const TiltCard = React.forwardRef<HTMLDivElement, TiltCardProps>(
 
         React.useEffect(() => {
             const element = localRef.current;
-            if (element) {
+            // Disable tilt on mobile devices to prevent layout interference and save battery
+            // Using matchMedia for better reactivity if needed, but simple check is fine here
+            const checkMobile = () => /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 1024;
+            const isMobile = checkMobile();
+            
+            if (element && !isMobile) {
                 VanillaTilt.init(element, {
-                    reverse: true, // Reversed tilt direction
-                    max: 10, // Increased tilt angle for more movement
-                    speed: 600, // Slower transition for "antimagnetic" smoothness
+                    reverse: true,
+                    max: 10,
+                    speed: 600,
                     glare: true,
                     "max-glare": 0.12,
-                    perspective: 10000, // High perspective eliminates idle shifts
+                    perspective: 10000,
                     scale: 1.00,
-                    easing: "cubic-bezier(.06,.96,.63, 0.96)", // Elastic but smooth easing
-                    gyroscope: true, // Enable gyroscope for mobile devices
+                    easing: "cubic-bezier(.06,.96,.63, 0.96)",
+                    gyroscope: true,
                     gyroscopeMinAngleX: -45,
                     gyroscopeMaxAngleX: 45,
                     gyroscopeMinAngleY: -45,

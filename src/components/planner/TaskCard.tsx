@@ -202,30 +202,25 @@ export const TaskCard = ({ item, minScore = 0, maxScore = 100, onTap, onEdit, on
   return (
     <div className="relative">
       {/* Background action indicators */}
-      <AnimatePresence>
-        {swipeAction === 'delete' && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15, ease: 'easeOut' }}
-            className="absolute inset-0 -inset-y-0.5 bg-destructive rounded-3xl flex items-center justify-end px-6"
-          >
-            <Trash2 className="w-6 h-6 text-destructive-foreground" />
-          </motion.div>
-        )}
-        {swipeAction === 'edit' && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            className="absolute inset-0 -inset-y-0.5 bg-primary rounded-3xl flex items-center justify-start px-6"
-          >
-            <Edit className="w-6 h-6 text-primary-foreground" />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <div className="absolute inset-0 -inset-y-0.5 overflow-hidden rounded-3xl">
+        <div
+          className={cn(
+            "absolute inset-0 bg-destructive flex items-center justify-end px-6 transition-opacity duration-200",
+            swipeAction === 'delete' ? "opacity-100" : "opacity-0"
+          )}
+        >
+          <Trash2 className="w-6 h-6 text-destructive-foreground" />
+        </div>
+        <div
+          className={cn(
+            "absolute inset-0 bg-primary flex items-center justify-start px-6 transition-opacity duration-200",
+            swipeAction === 'edit' ? "opacity-100" : "opacity-0"
+          )}
+        >
+          <Edit className="w-6 h-6 text-primary-foreground" />
+        </div>
+      </div>
+
 
       {/* Context Menu */}
       {showContextMenu && (
@@ -287,7 +282,8 @@ export const TaskCard = ({ item, minScore = 0, maxScore = 100, onTap, onEdit, on
       {/* Card */}
       <motion.div
         ref={cardRef}
-        layout="position"
+        layout
+        layoutId={`card-${item.id}`}
         drag="x"
         dragConstraints={{ left: -150, right: 150 }}
         dragElastic={0.1}
@@ -306,7 +302,11 @@ export const TaskCard = ({ item, minScore = 0, maxScore = 100, onTap, onEdit, on
         className={cn('paper p-4 cursor-pointer relative z-10 swipeable', className)}
         onClick={handleTap}
         whileTap={swipeState.isDragging ? undefined : { scale: 0.98 }}
-        transition={{ type: 'spring', stiffness: 260, damping: 32 }}
+        transition={{ 
+          layout: { type: 'spring', stiffness: 300, damping: 30 },
+          height: { duration: 0.15, ease: 'easeOut' },
+          opacity: { duration: 0.1 }
+        }}
         style={{ userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
       >
       {/* Header: Emoji + Name + Score */}
@@ -348,49 +348,26 @@ export const TaskCard = ({ item, minScore = 0, maxScore = 100, onTap, onEdit, on
       )}
 
       {/* Expanded Details */}
-      <AnimatePresence initial={false}>
-        {isExpanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{
-              height: 'auto',
-              opacity: 1,
-              transition: {
-                height: { duration: 0.2, ease: [0.4, 0, 0.2, 1] },
-                opacity: { duration: 0.15, delay: 0.05 }
-              }
-            }}
-            exit={{
-              opacity: 0,
-              height: 0,
-              transition: {
-                opacity: { duration: 0.1 },
-                height: { duration: 0.2, delay: 0.05, ease: [0.4, 0, 0.2, 1] }
-              }
-            }}
-            className="overflow-hidden"
-          >
-            <div className="space-y-2 pt-2 border-t border-border">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground font-semibold">ВАЖНО?</span>
-                <span className="text-sm text-muted-foreground font-numbers font-bold">{item.priority}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground font-semibold">ХОЧУ?</span>
-                <span className="text-sm text-muted-foreground font-numbers font-bold">{item.desire}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground font-semibold">СЛОЖНО?</span>
-                <span className="text-sm text-muted-foreground font-numbers font-bold">{item.difficulty}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground font-semibold">ГОТОВО%</span>
-                <span className="text-sm text-muted-foreground font-numbers font-bold">{item.percent}%</span>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {isExpanded && (
+        <div className="space-y-2 pt-3 mt-3 border-t border-border/40 overflow-hidden">
+          <div className="flex justify-between items-center transition-all duration-300">
+            <span className="text-sm text-muted-foreground font-semibold">ВАЖНО?</span>
+            <span className="text-sm text-muted-foreground font-numbers font-bold">{item.priority}</span>
+          </div>
+          <div className="flex justify-between items-center transition-all duration-300">
+            <span className="text-sm text-muted-foreground font-semibold">ХОЧУ?</span>
+            <span className="text-sm text-muted-foreground font-numbers font-bold">{item.desire}</span>
+          </div>
+          <div className="flex justify-between items-center transition-all duration-300">
+            <span className="text-sm text-muted-foreground font-semibold">СЛОЖНО?</span>
+            <span className="text-sm text-muted-foreground font-numbers font-bold">{item.difficulty}</span>
+          </div>
+          <div className="flex justify-between items-center transition-all duration-300">
+            <span className="text-sm text-muted-foreground font-semibold">ГОТОВО%</span>
+            <span className="text-sm text-muted-foreground font-numbers font-bold">{item.percent}%</span>
+          </div>
+        </div>
+      )}
     </motion.div>
     </div>
   );

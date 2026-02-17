@@ -238,10 +238,10 @@ const Index = () => {
 
   return (
     <BackgroundGradientAnimation
-      containerClassName="min-h-screen app-bg bg-transparent"
+      containerClassName="h-[100dvh] w-full app-bg bg-transparent overflow-hidden"
       complexity={bgComplexity}
     >
-      <div className="absolute inset-0 z-10 flex flex-col overflow-x-hidden overflow-y-auto">
+      <div className="absolute inset-0 z-10 flex flex-col overflow-x-hidden overflow-y-auto overscroll-contain">
         <ResponsiveHeader
           deviceType={deviceInfo.type}
           onMenuToggle={() => setIsMobileMenuOpen(true)}
