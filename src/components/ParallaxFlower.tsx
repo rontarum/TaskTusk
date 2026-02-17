@@ -8,7 +8,11 @@ import {
     useTime,
 } from "framer-motion";
 
-export const ParallaxFlower = () => {
+interface ParallaxFlowerProps {
+    disabled?: boolean;
+}
+
+export const ParallaxFlower = ({ disabled }: ParallaxFlowerProps) => {
     const mouseX = useMotionValue(0);
     const mouseY = useMotionValue(0);
 
@@ -32,12 +36,20 @@ export const ParallaxFlower = () => {
     // Sinusoidal rotation effect
     const time = useTime();
     const rotateComputed = useTransform(time, (t) => {
+        if (disabled) return 0; // Static rotation when disabled
         // T is in ms. We want a slow rotation.
         // Math.sin takes radians. Let's make it rotate +/- 90 degrees (180 total range)
         return Math.sin(t / 2000) * 90;
     });
 
     useEffect(() => {
+        if (disabled) {
+            // Reset to center position when disabled
+            mouseX.set(0);
+            mouseY.set(0);
+            return;
+        }
+
         const handleMouseMove = (e: MouseEvent) => {
             const { innerWidth, innerHeight } = window;
             const x = e.clientX - innerWidth / 2;
@@ -52,7 +64,7 @@ export const ParallaxFlower = () => {
 
         window.addEventListener("mousemove", handleMouseMove);
         return () => window.removeEventListener("mousemove", handleMouseMove);
-    }, [mouseX, mouseY]);
+    }, [mouseX, mouseY, disabled]);
 
     return (
         <motion.div

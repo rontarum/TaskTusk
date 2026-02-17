@@ -157,7 +157,7 @@ export const theme = {
             backgroundEnd: "#F5F5F5",
             first: "#93f1e5ff", /* Это первый цвет градиента, основа */
             second: "#E3F0F7",
-            third: "#E6F4F4",
+            third: "#ffd1e4",
             fourth: "#ffa6c9ff", /* Это второй цвет градиента, основа */
             fifth: "#E5EAF2",
             pointer: "#EDEDED",

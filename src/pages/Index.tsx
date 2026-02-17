@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useLocalStorageState } from "@/hooks/useLocalStorageState";
 import { useDevice } from "@/hooks/use-device";
 import { useMobileSettings } from "@/hooks/use-mobile-settings";
@@ -51,6 +52,7 @@ const Index = () => {
   const [desktopCompletingItemId, setDesktopCompletingItemId] = React.useState<string | null>(null);
   const [isPWAInstallOpen, setIsPWAInstallOpen] = React.useState(false);
   const [pwaPromptDismissed, setPwaPromptDismissed] = useLocalStorageState<boolean>(PWA_PROMPT_DISMISSED_KEY, false);
+  const [effectsDisabled, setEffectsDisabled] = useLocalStorageState<boolean>("tasktusk:effects-disabled", false);
   const deferredPromptRef = React.useRef<BeforeInstallPromptEvent | null>(null);
   const sortDelayTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const desktopCompletionTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -70,6 +72,11 @@ const Index = () => {
     if (deviceInfo.type === 'tablet') return 'reduced';
     return 'full';
   }, [deviceInfo.type, deviceInfo.capabilities.reducedMotion, isMobile, settings.enhancedEffects]);
+
+  // Determine if background animations should run
+  const bgAnimationsEnabled = React.useMemo(() => {
+    return !effectsDisabled && !deviceInfo.capabilities.reducedMotion;
+  }, [effectsDisabled, deviceInfo.capabilities.reducedMotion]);
 
   React.useEffect(() => {
     if (activeId && items.some((i) => i.id === activeId)) return;
@@ -363,6 +370,7 @@ const Index = () => {
     <BackgroundGradientAnimation
       containerClassName="h-[100dvh] w-full app-bg bg-transparent overflow-hidden"
       complexity={bgComplexity}
+      animationsEnabled={bgAnimationsEnabled}
     >
       <div className="absolute inset-0 z-10 flex flex-col overflow-x-hidden overflow-y-auto overscroll-contain">
         <ResponsiveHeader
@@ -387,8 +395,8 @@ const Index = () => {
         {/* Background SVG Logo & Flower - Desktop only */}
         {isDesktop && !deviceInfo.capabilities.reducedMotion && (
           <>
-            <ParallaxLogo />
-            <ParallaxFlower />
+            <ParallaxLogo disabled={effectsDisabled} />
+            <ParallaxFlower disabled={effectsDisabled} />
           </>
         )}
 
@@ -419,6 +427,21 @@ const Index = () => {
               </div>
 
               <div className="flex items-center justify-end gap-2">
+                {/* Effects toggle checkbox - same row as buttons */}
+                <div className="flex items-center gap-2 mr-4">
+                  <Checkbox
+                    id="effects-toggle"
+                    checked={effectsDisabled}
+                    onCheckedChange={(checked) => setEffectsDisabled(checked === true)}
+                    className="rounded"
+                  />
+                  <label
+                    htmlFor="effects-toggle"
+                    className="text-xs font-body cursor-pointer select-none"
+                  >
+                    Отключить эффекты
+                  </label>
+                </div>
                 <Button
                   variant="paper"
                   size="sm"
@@ -460,7 +483,7 @@ const Index = () => {
             {/* Left: Task input (Desktop/Tablet only) */}
             {!isMobile && (
               <section className="flex flex-col">
-                <TiltCard className="paper h-full p-6">
+                <TiltCard disabled={effectsDisabled} className="paper h-full p-6">
                   <div className="mb-4 flex items-center justify-between">
                     <div className="text-lg font-semibold font-heading">Таски</div>
                     <div className="text-xs text-muted-foreground">{items.length} шт.</div>
@@ -501,6 +524,7 @@ const Index = () => {
                 onCompletingItemComplete={handleCompletingItemComplete}
                 desktopCompletingItemId={desktopCompletingItemId || undefined}
                 onDesktopCompletingItemComplete={handleDesktopCompletingItemComplete}
+                effectsDisabled={effectsDisabled}
               />
             </section>
           </div>

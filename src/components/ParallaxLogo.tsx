@@ -8,7 +8,11 @@ import {
     useTime,
 } from "framer-motion";
 
-export const ParallaxLogo = () => {
+interface ParallaxLogoProps {
+    disabled?: boolean;
+}
+
+export const ParallaxLogo = ({ disabled }: ParallaxLogoProps) => {
     const mouseX = useMotionValue(0);
     const mouseY = useMotionValue(0);
 
@@ -61,12 +65,20 @@ export const ParallaxLogo = () => {
     // Sinusoidal rotation
     const time = useTime();
     const rotateComputed = useTransform(time, (t) => {
+        if (disabled) return -6; // Static rotation when disabled
         // Base -6 tilt + sin oscillation (faster than flower, 12 degree amplitude)
         return -6 + Math.sin(t / 800) * 12;
     });
 
 
     useEffect(() => {
+        if (disabled) {
+            // Reset to center position when disabled
+            mouseX.set(0);
+            mouseY.set(0);
+            return;
+        }
+
         const handleMouseMove = (e: MouseEvent) => {
             // Calculate position relative to center of screen
             const { innerWidth, innerHeight } = window;
@@ -81,7 +93,7 @@ export const ParallaxLogo = () => {
 
         window.addEventListener("mousemove", handleMouseMove);
         return () => window.removeEventListener("mousemove", handleMouseMove);
-    }, [mouseX, mouseY]);
+    }, [mouseX, mouseY, disabled]);
 
     return (
         <motion.div

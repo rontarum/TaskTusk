@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 interface TiltCardProps extends React.HTMLAttributes<HTMLDivElement> {
     options?: TiltOptions;
     children: React.ReactNode;
+    disabled?: boolean;
 }
 
 interface TiltElement extends HTMLDivElement {
@@ -12,7 +13,7 @@ interface TiltElement extends HTMLDivElement {
 }
 
 export const TiltCard = React.forwardRef<HTMLDivElement, TiltCardProps>(
-    ({ options, children, className, ...props }, ref) => {
+    ({ options, children, className, disabled, ...props }, ref) => {
         const localRef = React.useRef<HTMLDivElement>(null);
 
         // Merge ref
@@ -25,7 +26,7 @@ export const TiltCard = React.forwardRef<HTMLDivElement, TiltCardProps>(
             const checkMobile = () => /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 1024;
             const isMobile = checkMobile();
 
-            if (element && !isMobile) {
+            if (element && !isMobile && !disabled) {
                 VanillaTilt.init(element, {
                     reverse: true,
                     max: 10,
@@ -49,7 +50,7 @@ export const TiltCard = React.forwardRef<HTMLDivElement, TiltCardProps>(
                     (element as TiltElement).vanillaTilt.destroy();
                 }
             };
-        }, [options]);
+        }, [options, disabled]);
 
         return (
             <div

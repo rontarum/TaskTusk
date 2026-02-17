@@ -18,6 +18,7 @@ export const BackgroundGradientAnimation = ({
     interactive = true,
     containerClassName,
     complexity = 'full',
+    animationsEnabled = true,
 }: {
     gradientBackgroundStart?: string;
     gradientBackgroundEnd?: string;
@@ -34,6 +35,7 @@ export const BackgroundGradientAnimation = ({
     interactive?: boolean;
     containerClassName?: string;
     complexity?: 'full' | 'reduced' | 'minimal';
+    animationsEnabled?: boolean;
 }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const interactiveRef = useRef<HTMLDivElement>(null);
@@ -52,11 +54,11 @@ export const BackgroundGradientAnimation = ({
         fifth: complexity === 'full',
     };
 
-    // Disable interactive element for reduced/minimal
-    const isInteractive = interactive && complexity === 'full';
+    // Disable interactive element for reduced/minimal or when animations are disabled
+    const isInteractive = interactive && complexity === 'full' && animationsEnabled;
 
-    // Disable animations for minimal
-    const animationsEnabled = complexity !== 'minimal';
+    // Internal animation state based on complexity and external animationsEnabled prop
+    const internalAnimationsEnabled = animationsEnabled && complexity !== 'minimal';
 
     useEffect(() => {
         document.body.style.setProperty(
@@ -114,28 +116,33 @@ export const BackgroundGradientAnimation = ({
         };
     }, [isInteractive]);
 
-    // Pause animations when page is hidden
+    // Pause animations when page is hidden or when animations are disabled
     useEffect(() => {
         const handleVisibilityChange = () => {
-            if (document.hidden) {
-                // Page is hidden, pause animations
+            if (document.hidden || !internalAnimationsEnabled) {
+                // Page is hidden or animations disabled, pause animations
                 if (containerRef.current) {
                     containerRef.current.style.animationPlayState = 'paused';
                 }
             } else {
-                // Page is visible, resume animations
-                if (containerRef.current && animationsEnabled) {
+                // Page is visible and animations enabled, resume animations
+                if (containerRef.current) {
                     containerRef.current.style.animationPlayState = 'running';
                 }
             }
         };
+
+        // Initial state - pause if animations are disabled
+        if (!internalAnimationsEnabled && containerRef.current) {
+            containerRef.current.style.animationPlayState = 'paused';
+        }
 
         document.addEventListener('visibilitychange', handleVisibilityChange);
 
         return () => {
             document.removeEventListener('visibilitychange', handleVisibilityChange);
         };
-    }, [animationsEnabled]);
+    }, [internalAnimationsEnabled]);
 
     const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
         if (containerRef.current) {
@@ -184,57 +191,68 @@ export const BackgroundGradientAnimation = ({
                     isSafari ? "blur-2xl" : "[filter:url(#blurMe)_blur(40px)]"
                 )}
             >
+                {/* Gradient 1: Top-center when static, center when animated */}
                 {showGradients.first && (
                     <div
                         className={cn(
                             `absolute [background:radial-gradient(circle_at_center,_rgba(var(--first-color),_0.8)_0,_rgba(var(--first-color),_0)_50%)_no-repeat]`,
-                            `[mix-blend-mode:var(--blending-value)] w-[var(--size)] h-[var(--size)] top-[calc(50%-var(--size)/2)] left-[calc(50%-var(--size)/2)]`,
-                            `[transform-origin:center_center]`,
-                            animationsEnabled && `animate-first`,
+                            `[mix-blend-mode:var(--blending-value)] w-[var(--size)] h-[var(--size)]`,
+                            internalAnimationsEnabled
+                                ? `top-[calc(50%-var(--size)/2)] left-[calc(50%-var(--size)/2)] [transform-origin:center_center]`
+                                : `-top-[calc(var(--size)/2)] left-1/2 -translate-x-1/2`,
+                            internalAnimationsEnabled && `animate-first`,
                             `opacity-100`
                         )}
                     ></div>
                 )}
-                {showGradients.second && (
+                {/* Gradient 2: Only when animated */}
+                {showGradients.second && internalAnimationsEnabled && (
                     <div
                         className={cn(
                             `absolute [background:radial-gradient(circle_at_center,_rgba(var(--second-color),_0.8)_0,_rgba(var(--second-color),_0)_50%)_no-repeat]`,
                             `[mix-blend-mode:var(--blending-value)] w-[var(--size)] h-[var(--size)] top-[calc(50%-var(--size)/2)] left-[calc(50%-var(--size)/2)]`,
                             `[transform-origin:calc(50%-400px)]`,
-                            animationsEnabled && `animate-second`,
+                            `animate-second`,
                             `opacity-100`
                         )}
                     ></div>
                 )}
+                {/* Gradient 3: Bottom-right corner when static, normal position when animated */}
                 {showGradients.third && (
                     <div
                         className={cn(
                             `absolute [background:radial-gradient(circle_at_center,_rgba(var(--third-color),_0.8)_0,_rgba(var(--third-color),_0)_50%)_no-repeat]`,
-                            `[mix-blend-mode:var(--blending-value)] w-[var(--size)] h-[var(--size)] top-[calc(50%-var(--size)/2)] left-[calc(50%-var(--size)/2)]`,
-                            `[transform-origin:calc(50%+400px)]`,
-                            animationsEnabled && `animate-third`,
+                            `[mix-blend-mode:var(--blending-value)] w-[var(--size)] h-[var(--size)]`,
+                            internalAnimationsEnabled
+                                ? `top-[calc(50%-var(--size)/2)] left-[calc(50%-var(--size)/2)] [transform-origin:calc(50%+400px)]`
+                                : `-bottom-[calc(var(--size)/2)] -right-[calc(var(--size)/2)]`,
+                            internalAnimationsEnabled && `animate-third`,
                             `opacity-100`
                         )}
                     ></div>
                 )}
+                {/* Gradient 4: Left-center when static, normal position when animated */}
                 {showGradients.fourth && (
                     <div
                         className={cn(
                             `absolute [background:radial-gradient(circle_at_center,_rgba(var(--fourth-color),_0.8)_0,_rgba(var(--fourth-color),_0)_50%)_no-repeat]`,
-                            `[mix-blend-mode:var(--blending-value)] w-[var(--size)] h-[var(--size)] top-[calc(50%-var(--size)/2)] left-[calc(50%-var(--size)/2)]`,
-                            `[transform-origin:calc(50%-200px)]`,
-                            animationsEnabled && `animate-fourth`,
+                            `[mix-blend-mode:var(--blending-value)] w-[var(--size)] h-[var(--size)]`,
+                            internalAnimationsEnabled
+                                ? `top-[calc(50%-var(--size)/2)] left-[calc(50%-var(--size)/2)] [transform-origin:calc(50%-200px)]`
+                                : `top-1/2 -translate-y-1/2 -left-[calc(var(--size)/2)]`,
+                            internalAnimationsEnabled && `animate-fourth`,
                             `opacity-70`
                         )}
                     ></div>
                 )}
-                {showGradients.fifth && (
+                {/* Gradient 5: Only when animated */}
+                {showGradients.fifth && internalAnimationsEnabled && (
                     <div
                         className={cn(
                             `absolute [background:radial-gradient(circle_at_center,_rgba(var(--fifth-color),_0.8)_0,_rgba(var(--fifth-color),_0)_50%)_no-repeat]`,
                             `[mix-blend-mode:var(--blending-value)] w-[var(--size)] h-[var(--size)] top-[calc(50%-var(--size)/2)] left-[calc(50%-var(--size)/2)]`,
                             `[transform-origin:calc(50%-800px)_calc(50%+800px)]`,
-                            animationsEnabled && `animate-fifth`,
+                            `animate-fifth`,
                             `opacity-100`
                         )}
                     ></div>

@@ -23,6 +23,7 @@ type Props = {
   className?: string;
   completingItemId?: string;
   onCompletingItemComplete?: () => void;
+  effectsDisabled?: boolean;
 };
 
 export function PlannerScoringTable({
@@ -34,6 +35,7 @@ export function PlannerScoringTable({
   className,
   completingItemId,
   onCompletingItemComplete,
+  effectsDisabled,
 }: Props) {
   const byId = React.useMemo(() => new Map(items.map((i) => [i.id, i])), [items]);
   const ordered = order.map((id) => byId.get(id)).filter(Boolean) as PlannerItem[];
@@ -71,7 +73,7 @@ export function PlannerScoringTable({
 
   if (ordered.length === 0) {
     return (
-      <TiltCard className="paper p-6">
+      <TiltCard disabled={effectsDisabled} className="paper p-6">
         <div className="text-lg font-semibold font-heading">Оценка</div>
         <p className="mt-1 text-sm text-muted-foreground">Нужна хотя бы пара тасков для оценки и сравнения.</p>
       </TiltCard>
@@ -84,6 +86,7 @@ export function PlannerScoringTable({
   return (
     <TiltCard
       ref={rootRef}
+      disabled={effectsDisabled}
       className={cn("paper flex h-full flex-col", className)}
       onFocusCapture={handleFocusCapture}
       onBlurCapture={handleBlurCapture}

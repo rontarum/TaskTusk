@@ -78,9 +78,33 @@ export const MobileTaskForm = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    // Prevent form submission on Enter (mobile keyboards)
+    // Submit form on Enter/Return (mobile keyboards)
     if (e.key === 'Enter') {
       e.preventDefault();
+      // Blur the input to close keyboard
+      inputRef.current?.blur();
+      // Submit the form if text is not empty
+      if (text.trim()) {
+        onSubmit({
+          text: text.trim(),
+          emoji,
+          priority,
+          desire,
+          difficulty,
+          percent,
+        });
+        // Reset form
+        setText('');
+        setEmoji('❤️');
+        setPriority(5);
+        setDesire(5);
+        setDifficulty(5);
+        setPercent(0);
+        setError('');
+        onClose();
+      } else {
+        setError('Введите название таска');
+      }
     }
   };
 
