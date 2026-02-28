@@ -51,7 +51,7 @@ export function PWAInstallPrompt({ isOpen, onClose, onInstall }: PWAInstallPromp
 
                 {/* Description */}
                 <p className="mb-6 text-center text-sm text-muted-foreground font-body">
-                  Сохрани TaskTusk как приложение для быстрого доступа и лучшего опыта использования
+                  Сохрани TuskTask как приложение для быстрого доступа и лучшего опыта использования
                 </p>
 
                 {/* Buttons */}

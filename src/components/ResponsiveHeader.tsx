@@ -45,7 +45,7 @@ export const ResponsiveHeader = ({
               'font-semibold font-heading whitespace-nowrap',
               isMobile ? 'text-sm' : 'text-base'
             )}>
-              TASKTUSK
+              TUSKTASK
             </h1>
             {/* Hide tagline on mobile */}
             {!isMobile && (
