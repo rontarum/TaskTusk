@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tasktusk-v1.02';
+const CACHE_NAME = 'tusktask-v1.0';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
