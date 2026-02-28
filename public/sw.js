@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tusktask-v1.0';
+const CACHE_NAME = 'tasktusk-v1.1';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -54,24 +54,41 @@ self.addEventListener('fetch', (event) => {
   // For HTML and JS/CSS files - use Network First strategy
   if (isNav || isAsset) {
     event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          if (!response || response.status !== 200 || response.type !== 'basic') {
-            return response;
-          }
-          // Update cache with fresh version
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
+      fetch(event.request, {
+        cache: 'reload',
+        headers: {
+          'Cache-Control': 'no-cache'
+        }
+      }).then((response) => {
+        if (!response || response.status !== 200 || response.type !== 'basic') {
           return response;
-        })
-        .catch(() => {
-          // If network fails, try cache
-          return caches.match(event.request).then((cached) => {
-            return cached || new Response('Network error', { status: 408 });
+        }
+        // Check if response is already consumed before cloning
+        if (response.bodyUsed) {
+          return response;
+        }
+        // Update cache with fresh version
+        const responseToCache = response.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(event.request, responseToCache);
+        }).catch((err) => {
+          console.warn('Failed to cache response:', err);
+        });
+        return response;
+      })
+      .catch(() => {
+        // If network fails, try cache
+        return caches.match(event.request).then((cached) => {
+          if (cached) {
+            return cached;
+          }
+          // Return offline indicator if nothing is available
+          return new Response('<!DOCTYPE html><html><body>Offline</body></html>', {
+            status: 200,
+            headers: { 'Content-Type': 'text/html' }
           });
-        })
+        });
+      })
     );
     return;
   }
@@ -83,16 +100,33 @@ self.addEventListener('fetch', (event) => {
         if (cached) {
           return cached;
         }
-        return fetch(event.request)
+        return fetch(event.request, {
+          cache: 'reload',
+          headers: {
+            'Cache-Control': 'no-cache'
+          }
+        })
           .then((response) => {
             if (!response || response.status !== 200 || response.type !== 'basic') {
+              return response;
+            }
+            // Check if response is already consumed before cloning
+            if (response.bodyUsed) {
               return response;
             }
             const responseToCache = response.clone();
             caches.open(CACHE_NAME).then((cache) => {
               cache.put(event.request, responseToCache);
+            }).catch((err) => {
+              console.warn('Failed to cache response:', err);
             });
             return response;
+          }).catch(() => {
+            // If network fails for static asset, return error response
+            return new Response(null, {
+              status: 408,
+              statusText: 'Request Timeout'
+            });
           });
       })
     );
@@ -101,7 +135,34 @@ self.addEventListener('fetch', (event) => {
 
   // Default: try network, fallback to cache
   event.respondWith(
-    fetch(event.request)
-      .catch(() => caches.match(event.request))
+    fetch(event.request, {
+      cache: 'reload',
+      headers: {
+        'Cache-Control': 'no-cache'
+      }
+    })
+      .then((response) => {
+        // Check if response is already consumed before cloning
+        if (!response.bodyUsed && response.ok) {
+          const responseToCache = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
+          }).catch((err) => {
+            console.warn('Failed to cache response:', err);
+          });
+        }
+        return response;
+      })
+      .catch(() => {
+        return caches.match(event.request).then((cached) => {
+          if (cached) {
+            return cached;
+          }
+          return new Response(null, {
+            status: 503,
+            statusText: 'Service Unavailable'
+          });
+        });
+      })
   );
 });
